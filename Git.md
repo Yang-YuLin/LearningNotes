@@ -2,22 +2,24 @@
 
    - 1.选择一个合适的地方，创建一个空目录：
           - 创建一个空目录：mkdir dirname
-          - 切换到该目录下：cd dirname 
-          - pwd命令用于显示当前目录：pwd 	
-          - ls命令用于列出目标目录中所有的子目录和文件：ls 
-
+         - 切换到该目录下：cd dirname 
+         - pwd命令用于显示当前目录：pwd 	
+         - ls命令用于列出目标目录中所有的子目录和文件：ls 
    - 2.通过git init命令把这个目录变成Git可以管理的仓库：
         - git init
 
 - 添加文件到版本库，一定要放到dirname目录下（子目录也行）：
+  	
   	- 1.使用命令git add <filename>，注意，可反复多次使用，添加多个文件；
   	- 2.使用命令git commit -m <message>，完成。
 
 - 查看状态：
+  	
   	- 要随时掌握工作区的状态，使用git status命令。
   	- 如果git status告诉你有文件被修改过，用git diff <filename>可以查看修改内容。
 
 - 版本回退：	
+  	
   	- HEAD指向的版本就是当前版本，上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
   	- 因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id。
   	- 穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本。如果嫌输出信息太多，看的眼花缭乱的，可以试试加上--pretty=oneline参数。
@@ -128,9 +130,9 @@
 
 - 使用GitHub:
 
-  		- 在GitHub上，可以任意Fork开源仓库；
-  		- 自己拥有Fork后的仓库的读写权限；
-  		- 可以推送pull request给官方仓库来贡献代码。
+    - 在GitHub上，可以任意Fork开源仓库；
+    - 自己拥有Fork后的仓库的读写权限；
+    - 可以推送pull request给官方仓库来贡献代码。
 
 - 自定义Git:
 
