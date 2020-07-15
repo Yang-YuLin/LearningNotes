@@ -2,9 +2,9 @@
 
    - 1.选择一个合适的地方，创建一个空目录：
       -  创建一个空目录：mkdir dirname
-         - 切换到该目录下：cd dirname 
-         - pwd命令用于显示当前目录：pwd 	
-         - ls命令用于列出目标目录中所有的子目录和文件：ls 
+      -  切换到该目录下：cd dirname 
+      -  pwd命令用于显示当前目录：pwd 	
+      -  ls命令用于列出目标目录中所有的子目录和文件：ls 
    - 2.通过git init命令把这个目录变成Git可以管理的仓库：
         - git init
 
@@ -72,9 +72,9 @@
   	- 修复bug时，我们会通过创建新的分支进行修复，然后合并，最后删除；
   	- 当手头工作没有完成时，先把工作现场git stash（储藏）一下，然后去修复bug，修复后，再（恢复工作现场），回到工作现场。
   	- 恢复工作现场的方法：
-  	  - 1.用git stash apply恢复，但是恢复后，stash内容并不删除，需要用git stash drop来删除。
-  	  - 2.用git stash pop恢复，恢复的同时把stash内容也删了。
-  	  - 用命令git stash list 命令查看储藏起来的工作现场。
+    	  - 1.用git stash apply恢复，但是恢复后，stash内容并不删除，需要用git stash drop来删除。
+      	  - 2.用git stash pop恢复，恢复的同时把stash内容也删了。
+      	  - 用命令git stash list 命令查看储藏起来的工作现场。
 - Feature分支：
 
   	- 开发一个新feature，最好新建一个分支；
