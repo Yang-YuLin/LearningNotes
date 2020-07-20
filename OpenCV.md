@@ -123,7 +123,7 @@
     	//如果矩阵定义的是uchar类型的数据，在需要输入数据的时候，需要强制转换成int类型的数据进行输出
     	int value = (int)a.at<uchar>(0, 0);
     	
-    	//多通道矩阵中每一个元素坐标处都是多个数据
+    	//多通道矩阵中每一个元素坐标处都是多个数据，因此引入Vec3b等变量表示同一元素多个数据
     	//构造时赋值，将每个元素想要赋予的值放入Scalar结构中即可，用此方法会将图像中的每个元素赋值相同的数值
     	Mat b(3, 4, CV_8UC3, Scalar(0, 0, 1));//创建一个3通道矩阵，每个像素都是0,0,255
     	Vec3b vc3 = b.at<Vec3b>(0, 0);
@@ -205,6 +205,243 @@
     //这种方式可以通过直接给出行、列和通道数进行读取，前三种都需要知道Mat类矩阵存储数据的类型
     (int)(*(b.data + b.step[0] * row + b.step[1] * col + channel));
     ```
+
+- 图像的读取与显示
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//读取图像文件
+  	Mat img = imread("lena.jpg");
+  
+  	//通过判断返回矩阵的data属性是否为空或者empty()函数是否为真来判断是否成功读取图像
+  	if (img.empty())
+  	{
+  		cout << "Could not open or find the image" << endl;
+  		cin.get();
+  		return -1;
+  	}
+  
+  	//窗口的名字
+  	String windowName = "Test";
+  	//创建一个窗口
+  	namedWindow(windowName);
+  	//在创建的窗口里展示图像
+  	imshow(windowName, img);
+  	//用于将程序暂停一段时间，以毫秒计。参数缺省或者为0表示等待用户按键结束该函数
+  	waitKey(0);
+  	//关闭创建的窗口
+  	destroyWindow(windowName);
+  	return 0;
+  }
+  ```
+  
+- 视频加载与摄像头调用
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//更改输出界面颜色
+  	system("color F0");		
+  	//视频读取函数
+  	//VideoCapture video("music.mp4");
+  	//摄像头的直接调用
+  	VideoCapture video(0);
+  	if (video.isOpened())
+  	{
+  		//get()函数查看视频属性
+  		cout << "视频中图像的宽度=" << video.get(CAP_PROP_FRAME_WIDTH) << endl;
+  		cout << "视频中图像的高度=" << video.get(CAP_PROP_FRAME_HEIGHT) << endl;
+  		cout << "视频帧率=" << video.get(CAP_PROP_FPS) << endl;
+  		cout << "视频的总帧数=" << video.get(CAP_PROP_FRAME_COUNT) << endl;
+  	}
+  	else {
+  		cout << "请确认视频文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	while (1)
+  	{
+  		Mat frame;
+  		//通过">>"运算符将图像按照视频顺序由VideoCapture类变量赋值给Mat类变量
+  		video >> frame;
+  		//当VideoCapture类变量中所有的图像都赋值给Mat类变量后，再次赋值的时候Mat类变量会变为空矩阵，因此可以通过empty()判断VideoCapture类变量中是否所有图像都已经读取完毕
+  		if (frame.empty())
+  		{
+  			break;
+  		}
+  		imshow("video", frame);
+  		waitKey(1000 / video.get(CAP_PROP_FPS));
+  	}
+  	waitKey();
+  	return 0;
+  }
+  ```
+  
+- 图像的保存
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  void AlphaMat(Mat &mat) 
+  {
+  	CV_Assert(mat.channels() == 4);
+  	for (int i = 0; i < mat.rows; ++i)
+  	{
+  		for (int j = 0; j < mat.cols; ++j)
+  		{
+  			Vec4b& bgra = mat.at<Vec4b>(i, j);
+  			//蓝色通道
+  			bgra[0] = UCHAR_MAX;//255		
+  			//绿色通道  saturate_cast<uchar>主要是为了防止颜色溢出操作
+  			bgra[1] = saturate_cast<uchar>((float(mat.cols - j)) / ((float)mat.cols) * UCHAR_MAX);		
+  			//红色通道
+  			bgra[2] = saturate_cast<uchar>((float(mat.rows - i)) / ((float)mat.rows) * UCHAR_MAX);
+  			//Alpha通道
+  			bgra[3] = saturate_cast<uchar>(0.5 * (bgra[1] + bgra[2]));
+  		}
+  	}
+  }
+  
+  int main()
+  {
+  	//imwrite()函数用于将Mat类矩阵保存成图像文件
+  	//生成带有Alpha通道(4通道)的矩阵，并保存成PNG格式图像
+  	Mat mat(480, 640, CV_8UC4);
+  	AlphaMat(mat);
+  	vector<int> compression_params;
+  	//PNG格式图像压缩标志
+  	compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+  	//设置最高压缩质量
+  	compression_params.push_back(9);
+  	bool result = imwrite("alpha.png", mat, compression_params);
+  	if (!result)
+  	{
+  		cout << "保存成PNG格式图像失败" << endl;
+  		return -1;
+  	}
+  	cout << "保存成功" << endl;
+  	return 0;
+  }
+  ```
+
+- 视频的保存
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img;
+  	//摄像头的直接调用
+  	//VideoCapture video(0);
+  	//读取视频
+  	VideoCapture video;
+  	video.open("music.mp4");
+  
+  	//判断是否调用成功
+  	if (!video.isOpened())
+  	{
+  		cout << "打开摄像头失败，请确认摄像头是否安装成功";
+  		return -1;
+  	}
+  
+  	//获取图像
+  	video >> img;
+  	//检测是否成功获取图像
+  	if (img.empty()) {
+  		cout << "没有获取到图像" << endl;
+  		return -1;
+  	}
+  
+  	//VideoWrite()类用于实现多张图像保存成视频文件
+  	VideoWriter writer;
+  	//保存的视频文件名称
+  	string filename = "live.avi";
+  	//选择编码格式
+  	int codec = VideoWriter::fourcc('M', 'J', 'P', 'G');
+  	//设置视频帧率，即视频中每秒图像的张数
+  	double fps = 25.0;
+  	//判断相机（视频）类型是否为彩色
+  	bool isColor = (img.type() == CV_8UC3);
+  
+  	//创建保存视频
+  	writer.open(filename, codec, fps, img.size(), isColor);
+  
+  	//判断视频流是否创建成功
+  	if (!writer.isOpened())
+  	{
+  		cout << "打开视频文件失败，请确认是否为合法输入" << endl;
+  		return -1;
+  	}
+  
+  	while (1)
+  	{
+  		//检测是否执行完毕
+  		if (!video.read(img))		//判断能继续从摄像头或者视频文件中读出一帧图像
+  		{
+  			cout << "摄像头断开连接或者视频读取完成" << endl;
+  			break;
+  		}
+  		//把图像写入视频流
+  		writer.write(img);
+  		//writer << img;
+  		//显示图像
+  		imshow("Live", img);
+  		char c = waitKey(50);
+  		//按ESC按键退出视频保存
+  		if (c == 27)
+  		{
+  			break;
+  		}
+  	}
+  	//退出程序时自动关闭视频流
+  	video.release();
+  	writer.release();
+  	return 0;
+  }
+  ```
+  
+- 保存和读取XML和YMAL文件
+
+  除了图像数据之外，有时程序中的尺寸较小的Mat类矩阵、字符串、数组等数据也需要进行保存，这些数据通常保存成XML文件或者YAML文件。
+  
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
 
 - 
 
