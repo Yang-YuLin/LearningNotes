@@ -423,9 +423,8 @@
   
 - 保存和读取XML和YMAL文件
 
-  除了图像数据之外，有时程序中的尺寸较小的Mat类矩阵、字符串、数组等数据也需要进行保存，这些数据通常保存成XML文件或者YAML文件。
-  
-  程序中使用write()函数和“<<”操作符两种方式向文件中写入数据，使用迭代器和“[]”地址两种方式从文件中读取数据。
+  - 除了图像数据之外，有时程序中的尺寸较小的Mat类矩阵、字符串、数组等数据也需要进行保存，这些数据通常保存成XML文件或者YAML文件。
+  - 程序中使用write()函数和“<<”操作符两种方式向文件中写入数据，使用迭代器和“[]”地址两种方式从文件中读取数据。
   
   ```c++
   #include <opencv2/opencv.hpp>
@@ -517,14 +516,163 @@
   }
   ```
   
-- 
+- 颜色模型与转换
 
-- 
+  - RGB颜色模型：如果三种颜色分量都为0，则表示为黑色。
+  
+    ​						  如果三种颜色的分类相同且都为最大值，则表示为白色。
+  
+    ​						  RGB取值范围均为0~255。
+  
+  - YUV颜色模型：像素的宽度(Y)、红色分量与亮度的信号差值(U)、蓝色分量与亮度的信号差值(V)
+  
+  - HSV颜色模型：色度(Hue)**颜色**、饱和度(Saturation)**深浅**、亮度(Value)**亮暗**
+  
+  - Lab颜色模型：L表示亮度，a和b是两个颜色通道，两者的取值区间都是-128到+127。
+  
+    ​						其中a通道数值由小到大对应的颜色是从绿色变成红色，b通道数值由小到大对应的						颜色是从蓝色变成黄色。
+  
+  - GRAY颜色模型：是灰度图像的模型，灰度图像只有单通道，灰度值根据图像位数不同由0到最大   
+  
+    ​                            依次表示由黑到白
+  
+  - 不同颜色模型间的互相转换：
+  
+    如果转换过程中添加了alpha通道（RGB模型中第四个通道，表示透明度），则其值将设置为相应通道范围的最大值：CV_8U为255，CV_16U为65535，CV_32F为1。
+  
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("lena.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat gray, HSV, YUV, Lab, img32;
+    	//为了防止转换后出现数组越界的情况，将CV_8U类型转换成CV_32F类型
+    	img.convertTo(img32, CV_32F, 1.0 / 255);
+    	cvtColor(img32, HSV, COLOR_BGR2HSV);
+    	cvtColor(img32, YUV, COLOR_BGR2YUV);
+    	cvtColor(img32, Lab, COLOR_BGR2Lab);
+    	cvtColor(img32, gray, COLOR_BGR2GRAY);
+    	imshow("原图", img32);
+    	imshow("HSV", HSV);
+    	imshow("YUV", YUV);
+    	imshow("Lab", Lab);
+    	imshow("gray", gray);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+  
+- 图像像素统计
 
-- 
-
-- 
-
+  - Point(x,y)对应于图像的行和列表示为Point(列数，行数)
+  
+  - 寻找图像像素最大值与最小值
+  
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	float a[12] = { 1,2,3,4,5,10,6,7,8,9,10,0 };
+    	//单通道矩阵
+    	Mat img = Mat(3, 4, CV_32FC1, a);
+    	//多通道矩阵
+    	Mat imgs = Mat(2, 3, CV_32FC2, a);
+    	//用于存放矩阵中的最大值和最小值
+    	double minVal, maxVal;
+    	//用于存放矩阵中的最大值和最小值在矩阵中的位置
+    	Point minIdx, maxIdx;
+    
+    	//寻找单通道矩阵中的最值
+    	minMaxLoc(img, &minVal, &maxVal, &minIdx, &maxIdx);
+    	cout << "img中最大值是：" << maxVal << "  " << "在矩阵中的位置：" << maxIdx << endl;
+    	cout << "img中最小值是：" << minVal << "  " << "在矩阵中的位置：" << minIdx << endl;
+    
+    	//寻找多通道矩阵中的最值
+    	Mat imgs_re = imgs.reshape(1, 4);	//将多通道矩阵变成单通道矩阵,第一个参数是转换后矩阵的通道数，第二个参数是转换后矩阵的行数，如果参数为零，则转换后行数与转换前相同
+    	minMaxLoc(imgs_re, &minVal, &maxVal, &minIdx, &maxIdx);
+    	cout << "imgs中最大值是：" << maxVal << "  " << "在矩阵中的位置：" << maxIdx << endl;
+    	cout << "imgs中最小值是：" << minVal << "  " << "在矩阵中的位置：" << minIdx << endl;
+    	return 0;
+    }
+    ```
+  
+  - 计算图像的均值和标准方差
+  
+    	- 图像的均值表示图像整体的亮暗程度，均值越大图像整体越亮
+    	- 图像的标准方差表示图像中明暗变化的对比程度，标准方差越大图像中明暗变化越明显
+  
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//更改输出界面颜色
+  	system("color F0");
+  	float a[12] = { 1,2,3,4,5,10,6,7,8,9,10,0 };
+  	//单通道矩阵
+  	Mat img = Mat(3, 4, CV_32FC1, a);
+  	//多通道矩阵
+  	Mat imgs = Mat(2, 3, CV_32FC2, a);
+  
+  	//用于存放矩阵中的最大值和最小值
+  	double minVal, maxVal;
+  	//用于存放矩阵中的最大值和最小值在矩阵中的位置
+  	Point minIdx, maxIdx;
+  
+  	//寻找单通道矩阵中的最值
+  	minMaxLoc(img, &minVal, &maxVal, &minIdx, &maxIdx);
+  	cout << "img中最大值是：" << maxVal << "  " << "在矩阵中的位置：" << maxIdx << endl;
+  	cout << "img中最小值是：" << minVal << "  " << "在矩阵中的位置：" << minIdx << endl;
+  
+  	//寻找多通道矩阵中的最值
+  	Mat imgs_re = imgs.reshape(1, 4);	//将多通道矩阵变成单通道矩阵,第一个参数是转换后矩阵的通道数，第二个参数是转换后矩阵的行数，如果参数为零，则转换后行数与转换前相同
+  	minMaxLoc(imgs_re, &minVal, &maxVal, &minIdx, &maxIdx);
+  	cout << "imgs中最大值是：" << maxVal << "  " << "在矩阵中的位置：" << maxIdx << endl;
+  	cout << "imgs中最小值是：" << minVal << "  " << "在矩阵中的位置：" << minIdx << endl;
+  	
+  	//用mean()求取图像的均值
+  	Scalar myMean;
+  	myMean = mean(imgs);
+  	cout << "imgs均值=" << myMean << endl;
+  	cout << "imgs第一个通道的均值=" << myMean[0] << "   "
+  	    	<< "imgs第二个通道的均值=" << myMean[1] << endl << endl;
+  	
+  	//用meanStdDev()同时求取图像的均值和标准方差
+  	Mat myMeanMat, myStddevMat;
+  	meanStdDev(img, myMeanMat, myStddevMat);
+  	cout << "img均值=" << myMeanMat << "    " << endl;
+  	cout << "img标准方差=" << myStddevMat << endl << endl;
+  	meanStdDev(imgs, myMeanMat, myStddevMat);
+  	cout << "imgs均值=" << myMeanMat << "    " << endl << endl;
+  	cout << "imgs标准方差=" << myStddevMat << endl;
+  	return 0;
+  }
+  ```
+  
 - 
 
 - 
