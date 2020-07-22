@@ -673,9 +673,133 @@
   }
   ```
   
-- 
+- 两图像间的像素操作
 
-- 
+  - 两张图像的比较运算
+  
+    ```c#
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	float a[12] = { 1, 2, 3.3f, 4, 5, 9, 5, 7, 8.2f, 9, 10, 2 };
+    	float b[12] = { 1, 2.2f, 3, 1, 3, 10, 6, 7, 8, 9.3f, 10, 1 };
+    	Mat imga = Mat(3, 4, CV_32FC1, a);
+    	Mat imgb = Mat(3, 4, CV_32FC1, b);
+    	Mat imgas = Mat(2, 3, CV_32FC2, a);
+    	Mat imgbs = Mat(2, 3, CV_32FC2, b);
+    
+    	//对两个单通道矩阵进行比较运算
+    	Mat myMax, myMin;
+    	max(imga, imgb, myMax);
+    	min(imga, imgb, myMin);
+    	
+    	//对两个多通道矩阵进行比较运算
+    	Mat myMaxs, myMins;
+    	max(imgas, imgbs, myMaxs);
+    	min(imgas, imgbs, myMins);
+    
+    	//对两张彩色图像进行比较运算
+    	Mat img0 = imread("lena.jpg");
+    	Mat img1 = imread("mitu.jpg");
+    	if (img0.empty() || img1.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat comMin, comMax;
+    	max(img0, img1, comMax);
+    	min(img0, img1, comMin);
+    	imshow("comMin", comMin);
+    	imshow("comMax", comMax);
+    
+    	//与掩模进行比较运算，可以实现抠图或者选择通道的效果
+    	Mat src1 = Mat::zeros(Size(512, 512), CV_8UC3);
+    	Rect rect(100, 100, 300, 300);		//(x,y,width,height)
+    	//生成一个低通300*300的掩模 掩模是用于设置图像或矩阵中逻辑运算的范围
+    	src1(rect) = Scalar(255, 255, 255);
+    	imshow("src1", src1);
+    	Mat comsrc1, comsrc2;
+    	min(img0, src1, comsrc1);
+    	imshow("comsrc1", comsrc1);
+    
+    	//生成一个显示红色通道的低通掩模
+    	Mat src2 = Mat(512, 512, CV_8UC3, Scalar(0, 0, 255));
+    	imshow("src2", src2);
+    	min(img0, src2, comsrc2);
+    	imshow("comsrc2", comsrc2);
+    
+    	//对两张灰度图像进行比较运算
+    	Mat img0G, img1G, comMinG, comMaxG;
+    	cvtColor(img0, img0G, COLOR_BGR2GRAY);
+    	cvtColor(img1, img1G, COLOR_BGR2GRAY);
+    	max(img0G, img1G, comMaxG);
+    	min(img0G, img1G, comMinG);
+    	imshow("comMinG", comMinG);
+    	imshow("comMaxG", comMaxG);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+  
+  - 两张图像的逻辑运算
+  
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("lena.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	//创建两个黑白图像
+    	Mat img0 = Mat::zeros(200, 200, CV_8UC1);
+    	Mat img1 = Mat::zeros(200, 200, CV_8UC1);
+    	Rect rect0(50, 50, 100, 100);
+    	img0(rect0) = Scalar(255);
+    	Rect rect1(100, 100, 100, 100);
+    	img1(rect1) = Scalar(255);
+    	imshow("img0", img0);
+    	imshow("img1", img1);
+    
+    	//进行逻辑运算
+    	Mat myAnd, myOr, myXor, myNot, imgNot;
+    	//像素求与运算
+    	bitwise_and(img0, img1, myAnd);
+    	//像素求或运算
+    	bitwise_or(img0, img1, myOr);
+    	//像素求异或运算
+    	bitwise_xor(img0, img1, myXor);
+    	//像素求非运算
+    	bitwise_not(img0, myNot);
+    	bitwise_not(img, imgNot);
+    
+    	imshow("myAnd", myAnd);
+    	imshow("myOr", myOr);
+    	imshow("myXor", myXor);
+    	imshow("myNot", myNot);
+    	imshow("img", img);
+    	imshow("imgNot", imgNot);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+  
+- 图像LUT查找表：需要与多个阈值进行比较时使用。LUT查找表简单来说就是一个像素灰度值的映射表，它以像素灰度值作为索引，以灰度值映射后的数值作为表中的内容。
 
 - 
 
