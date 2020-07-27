@@ -801,6 +801,265 @@
   
 - 图像LUT查找表：需要与多个阈值进行比较时使用。LUT查找表简单来说就是一个像素灰度值的映射表，它以像素灰度值作为索引，以灰度值映射后的数值作为表中的内容。
 
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main(int argc,char** argv)
+  {
+  	//LUT查找表第一层
+  	uchar lutFirst[256];
+  	for (int i = 0; i < 256; i++)
+  	{
+  		if (i <= 100)
+  			lutFirst[i] = 0;
+  		if (i > 100 && i <= 200)
+  			lutFirst[i] = 100;
+  		if (i > 200)
+  			lutFirst[i] = 255;
+  	}
+  	Mat lutOne(1, 256, CV_8UC1, lutFirst);
+  
+  	//LUT查找表第二层
+  	uchar lutSecond[256];
+  	for (int i = 0; i < 256; i++)
+  	{
+  		if (i <= 100)
+  			lutSecond[i] = 0;
+  		if (i > 100 && i <= 150)
+  			lutSecond[i] = 100;
+  		if (i > 150 && i <= 200)
+  			lutSecond[i] = 150;
+  		if (i > 200)
+  			lutSecond[i] = 255;
+  	}
+  	Mat lutTwo(1, 256, CV_8UC1, lutSecond);
+  
+  	//LUT查找表第三层
+  	uchar lutThird[256];
+  	for (int i = 0; i < 256; i++)
+  	{
+  		if (i <= 100)
+  			lutSecond[i] = 0;
+  		if (i > 100 && i <= 200)
+  			lutSecond[i] = 200;
+  		if (i > 200)
+  			lutSecond[i] = 255;
+  	}
+  	Mat lutThree(1, 256, CV_8UC1, lutThird);
+  
+  	//拥有三通道的LUT查找表矩阵
+  	vector<Mat> mergeMats;
+  	mergeMats.push_back(lutOne);
+  	mergeMats.push_back(lutTwo);
+  	mergeMats.push_back(lutThree);
+  	Mat LutTree;
+  	merge(mergeMats, LutTree);
+  
+  	//计算图像的查找表
+  	Mat img = imread("lena.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  
+  	Mat gray, out0, out1, out2;
+  	cvtColor(img, gray, COLOR_BGR2GRAY);
+  	//LUT函数的第一个输入参数要求的数据类型必须是CV_8U类型，但可以是多通道的图像矩阵
+  	//第二个参数是一个1*256的矩阵，其中存放着每个像素灰度值映射后的数值
+  	//函数输出图像的数据类型不与原图像的数据类型保持一致，而是和LUT查找表的数据类型保持一致
+  	LUT(gray, lutOne, out0);
+  	LUT(img, lutTwo, out1);
+  	LUT(img, LutTree, out2);
+  	imshow("out0", out0);
+  	imshow("out1", out1);
+  	imshow("out2", out2);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
+- 图像多通道分离与合并
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("lena.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	Mat HSV;
+  	cvtColor(img, HSV, COLOR_RGB2HSV);
+  	//用于存放数组类型的结果
+  	Mat imgs0, imgs1, imgs2;
+  	//用于存放vector类型的结果
+  	Mat imgv0, imgv1, imgv2;
+  	//多通道合并的结果
+  	Mat result0, result1, result2;
+  
+  	//输入数组参数的多通道分离与合并
+  	Mat imgs[3];
+  	split(img, imgs);
+  	imgs0 = imgs[0];
+  	imgs1 = imgs[1];
+  	imgs2 = imgs[2];
+  	//显示分离后R通道的像素值
+  	imshow("RGB-R通道", imgs0);
+  	//显示分离后G通道的像素值
+  	imshow("RGB-G通道", imgs1);
+  	//显示分离后B通道的像素值
+  	imshow("RGB-B通道", imgs2);
+  	//将数组中的图像通道数变成不统一
+  	imgs[2] = img;
+  	//合并图像
+  	merge(imgs, 3, result0);
+  	Mat zero = cv::Mat::zeros(img.rows, img.cols, CV_8UC1);
+  	imgs[0] = zero;
+  	imgs[2] = zero;
+  	//用于还原G通道的真实情况，合并结果为绿色
+  	merge(imgs, 3, result1);
+  	//显示合并结果
+  	imshow("result1", result1);
+  
+  	//输入vector参数的多通道分离与合并
+  	vector<Mat> imgv;
+  	split(HSV, imgv);
+  	imgv0 = imgv.at(0);
+  	imgv1 = imgv.at(1);
+  	imgv2 = imgv.at(2);
+  	//显示分离后H通道的像素值
+  	imshow("HSV-H通道", imgv0);
+  	//显示分离后S通道的像素值
+  	imshow("HSV-S通道", imgv1);
+  	//显示分离后V通道的像素值
+  	imshow("HSV-V通道", imgv2);
+  	//将vector中的图像通道数变成不统一
+  	imgv.push_back(HSV);
+  	//合并图像
+  	merge(imgv, result2);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
+- 图像仿射变换：就是图像的旋转、平移和缩放操作的统称。
+
+  实现图像的旋转首先需要确定旋转角度和旋转中心，之后确定旋转矩阵，最终通过仿射变换实现图像旋转。
+  
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("lena.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  
+  	Mat rotation0, rotation1, img_warp0, img_warp1;
+  	//设置图像旋转的角度
+  	double angle = 30;
+  	//设置输出图像的尺寸
+  	Size dst_size(img.rows, img.cols);
+  	//设置图像的旋转中心
+  	Point2f center(img.rows / 2.0, img.cols / 2.0);
+  	//计算仿射变换矩阵
+  	rotation0 = getRotationMatrix2D(center, angle, 1);
+  	//进行仿射变换
+  	warpAffine(img, img_warp0, rotation0, dst_size);
+  	imshow("img_warp0", img_warp0);
+  	//根据定义的三个点进行仿射变换
+  	Point2f src_points[3];
+  	Point2f dst_points[3];
+  	//原始图像中的三个点
+  	src_points[0] = Point2f(0, 0);
+  	src_points[1] = Point2f(0, (float)(img.cols-1));
+  	src_points[2] = Point2f((float)(img.rows - 1), (float)(img.cols - 1));
+  	//仿射变换后图像中的三个点
+  	dst_points[0] = Point2f((float)(img.rows)*0.11, (float)(img.cols)*0.20);
+  	dst_points[1] = Point2f((float)(img.rows)*0.15, (float)(img.cols)*0.70);
+  	dst_points[2] = Point2f((float)(img.rows)*0.81, (float)(img.cols)*0.85);
+  	//根据对应点求取仿射变换矩阵
+  	rotation1 = getAffineTransform(src_points, dst_points);
+  	//进行仿射变换
+  	warpAffine(img, img_warp1, rotation1, dst_size);
+  	imshow("img_warp1", img_warp1);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+  
+  ![image-20200727161141003](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727161141003.png)
+  
+- 图像透视变换：按照物体成像投影规律进行变换，即将物体重新投影到新的成像平面，通过图像的透视变换实现对物体图像的校正
+
+  ```c++
+  //二维码图像透视变换
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("qrcode.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  
+  	//根据定义的四个点进行透视变换
+  	Point2f src_points[4];
+  	Point2f dst_points[4];
+  	//原始二维码图像的四个角点坐标
+  	src_points[0] = Point2f(0.0, 0.0);
+  	src_points[1] = Point2f(627.0, 0.0);
+  	src_points[2] = Point2f(0.0, 627.0);
+  	src_points[3] = Point2f(627.0, 627.0);
+  	//期望透视变换后二维码图像四个角点坐标
+  	dst_points[0] = Point2f(94.0, 374.0);
+  	dst_points[1] = Point2f(507.0, 380.0);
+  	dst_points[2] = Point2f(1.0, 623.0);
+  	dst_points[3] = Point2f(627.0, 627.0);
+  	Mat rotation, img_warp;
+  	//根据对应点求取透视变换矩阵
+  	rotation = getPerspectiveTransform(src_points, dst_points);
+  	//进行透视变换
+  	warpPerspective(img, img_warp, rotation, img.size());
+  	imshow("img", img);
+  	imshow("img_warp", img_warp);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+  
+  ![image-20200727163918034](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727163918034.png)
+  
+- 
+
 - 
 
 - 
