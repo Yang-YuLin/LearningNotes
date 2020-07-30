@@ -1233,6 +1233,200 @@
 
   ![image-20200728170621371](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200728170621371.png)
 
+- 图像金字塔：通过多个分辨率表示图像的一种有效且简单的结构。
+
+  金字塔的底部是待处理图像的高分辨率表示，而顶部是低分辨率的表示。
+  
+  - 高斯金字塔：是解决尺度不确定性的一种常用方法。通过底层图像构建上层图像。
+  
+    - 通过下采样不断的将图像的尺寸缩小，进而在金字塔中包含多个尺度的图像。
+  
+    - 一般情况下，高斯金字塔的底部为图像的原图，每上一层就会通过下采样缩小一次图像的尺寸，通过情况尺寸会缩小为原来的一半。常见的层数为3到6层。
+    - pyrDown()用于实现图像模糊并对其进行下采样计算，最终实现尺寸缩小的下采样图像。
+  
+    ![image-20200729205330337](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200729205330337.png)
+  
+  - 拉普拉斯金字塔：具有预测残差的作用，需与高斯金字塔一起使用。通过上层小尺寸的图像构建下层大尺寸的图像。
+  
+    - pyrUp()用于实现图像的上采样。
+  
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("lena.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请检查图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  
+  	//高斯金字塔和拉普拉斯金字塔
+  	vector<Mat> Gauss, Lap;
+  	//高斯金字塔下采样次数
+  	int level = 3;
+  	//将原图作为高斯金字塔的第0层
+  	Gauss.push_back(img);
+  	//构建高斯金字塔
+  	for (int i = 0; i < level; i++)
+  	{
+  		Mat gauss;
+  		//下采样
+  		pyrDown(Gauss[i], gauss);
+  		Gauss.push_back(gauss);
+  	}
+  	//构建拉普拉斯金字塔
+  	for (int i = Gauss.size() - 1; i > 0; i--)
+  	{
+  		Mat lap, upGauss;
+  		//如果是高斯金字塔中的最上面一层图像
+  		if (i == Gauss.size() - 1)
+  		{
+  			Mat down;
+  			pyrDown(Gauss[i], down);
+  			pyrUp(down, upGauss);
+  			lap = Gauss[i] - upGauss;
+  			Lap.push_back(lap);
+  		}
+  		pyrUp(Gauss[i], upGauss);
+  		lap = Gauss[i - 1] - upGauss;
+  		Lap.push_back(lap);
+  	}
+  
+  	//查看两个金字塔中的图像
+  	for (int i = 0; i < Gauss.size(); i++)
+  	{
+  		String name = to_string(i);
+  		imshow('G' + name, Gauss[i]);
+  		imshow('L' + name, Lap[i]);
+  	}
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+  
+- 窗口交互操作
+
+  - 图像窗口滑动条：能够改变参数数值的滑动条
+  
+    通过滑动条改变图像亮度，程序中滑动条控制图像亮度系数，将图像原始灰度值乘以亮度系数得到最终的图像。
+  
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    //为了能在被调函数中使用，所以设置成全局的
+    int value;
+    //滑动条回调函数
+    void callBack(int, void*);
+    Mat img1,img2;
+    
+    int main()
+    {
+    	img1 = imread("lena.jpg");
+    	if (!img1.data)
+    	{
+    		cout << "请确认是否输入正确的图像文件" << endl;
+    		return -1;
+    	}
+    	namedWindow("滑动条改变图像亮度");
+    	imshow("滑动条改变图像亮度", img1);
+    	//滑动条创建时的初值
+    	value = 100;
+    	//创建滑动条
+    	createTrackbar("亮度值百分比", "滑动条改变图像亮度", &value, 600, callBack, 0);
+    	waitKey();
+    }
+    
+    static void callBack(int, void*)
+    {
+    	float a = value / 100.0;
+    	img2 = img1*a;
+    	imshow("滑动条改变图像亮度", img2);
+    }
+    ```
+  
+  - 鼠标交互响应
+  
+    绘制鼠标移动轨迹
+  
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    //全局的图像
+    Mat img, imgPoint;
+    //前一时刻鼠标的坐标，用于绘制直线
+    Point prePoint;
+    void mouse(int event, int x, int y, int flags, void*);
+    
+    int main()
+    {
+    	img = imread("lena.jpg");
+    	if (!img.data)
+    	{
+    		cout << "请确认输入图像名称是否正确！" << endl;
+    		return -1;
+    	}
+    	img.copyTo(imgPoint);
+    	imshow("图像窗口1", img);
+    	imshow("图像窗口2", imgPoint);
+    	//鼠标影响
+    	setMouseCallback("图像窗口1", mouse, 0);
+    	waitKey(0);
+    	return 0;
+    }
+    
+    void mouse(int event, int x, int y, int flags, void*)
+    {
+    	//单击右键
+    	if (event == EVENT_RBUTTONDOWN)
+    	{
+    		cout << "点击鼠标左键才可以绘制轨迹" << endl;
+    	}
+    	//单机左键，输出坐标
+    	if (event == EVENT_LBUTTONDOWN)
+    	{
+    		prePoint = Point(x, y);
+    		cout << "轨迹起始坐标" << prePoint << endl;
+    	}
+    	//鼠标按住左键移动
+    	if (event == EVENT_MOUSEMOVE && (flags&EVENT_FLAG_LBUTTON))
+    	{
+    		//通过改变图像像素显示鼠标移动轨迹
+    		//回调函数有一定的执行时间，因此当鼠标移动较快时绘制的图像轨迹会出现断点
+    		imgPoint.at<Vec3b>(y, x) = Vec3b(0, 0, 255);
+    		imgPoint.at<Vec3b>(y, x - 1) = Vec3b(0, 0, 255);
+    		imgPoint.at<Vec3b>(y, x + 1) = Vec3b(0, 0, 255);
+    		imgPoint.at<Vec3b>(y - 1, x) = Vec3b(0, 0, 255);
+    		imgPoint.at<Vec3b>(y + 1, x) = Vec3b(0, 0, 255);
+    		imshow("图像窗口2", imgPoint);
+    
+    		//通过绘制直线显示鼠标移动轨迹
+    		//这种方式是在前一时刻和当前时刻鼠标位置间绘制直线，可以避免因鼠标移动过快而带来的轨迹出现断点的问题
+    		Point pt(x, y);
+    		line(img, prePoint, pt, Scalar(0, 0, 255), 2, 5, 0);
+    		prePoint = pt;
+    		imshow("图像窗口1", img);
+    	}
+    }
+    ```
+  
+- 
+
+- 
+
 - 
 
   
