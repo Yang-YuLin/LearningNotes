@@ -7,10 +7,11 @@
 - **双边滤波可视为高斯平滑**，对相似的像素赋予较高的权重，不相似的像素赋予较小的权重，典型效果就是使处理过的图像看上去更像是一幅源图的水彩画，可用于**图像的分割**。
 
 - 图像形态学：改变物体的形状
-  
+
 - 膨胀(求局部最大值)、腐蚀(求局部最小值)
-  
+
 - 图像金字塔：运用了颜色融合(根据依赖于颜色相互之间的相似性度量)实现**图像分割**
+
   - 高斯金字塔 ：向下降采样图像
   - 拉普拉斯金字塔：从金字塔低层图像中向上采样重建一个图像
 
@@ -19,9 +20,9 @@
 - 分水岭算法：**分割图像**
 
 - 无监督的学习算法叫做聚类算法，不需要对数据进行训练和学习。聚类就是看能把数据分成几类。
-  
+
 - K均值
-  
+
 - 随机森林：可以通过收集很多树的子节点对各个类别的投票，然后选择获得最多投票的类别作为判断结果。
 
 - 随机森林和AdaBoost：需要建立多棵树
@@ -241,7 +242,7 @@
   	return 0;
   }
   ```
-  
+
 - 视频加载与摄像头调用
 
   ```c++
@@ -288,7 +289,7 @@
   	return 0;
   }
   ```
-  
+
 - 图像的保存
 
   ```c++
@@ -420,12 +421,12 @@
   	return 0;
   }
   ```
-  
+
 - 保存和读取XML和YMAL文件
 
   - 除了图像数据之外，有时程序中的尺寸较小的Mat类矩阵、字符串、数组等数据也需要进行保存，这些数据通常保存成XML文件或者YAML文件。
   - 程序中使用write()函数和“<<”操作符两种方式向文件中写入数据，使用迭代器和“[]”地址两种方式从文件中读取数据。
-  
+
   ```c++
   #include <opencv2/opencv.hpp>
   #include <iostream>
@@ -515,31 +516,31 @@
   	return 0;
   }
   ```
-  
+
 - 颜色模型与转换
 
   - RGB颜色模型：如果三种颜色分量都为0，则表示为黑色。
-  
+
     ​						  如果三种颜色的分类相同且都为最大值，则表示为白色。
-  
+
     ​						  RGB取值范围均为0~255。
-  
+
   - YUV颜色模型：像素的宽度(Y)、红色分量与亮度的信号差值(U)、蓝色分量与亮度的信号差值(V)
-  
+
   - HSV颜色模型：色度(Hue)**颜色**、饱和度(Saturation)**深浅**、亮度(Value)**亮暗**
-  
+
   - Lab颜色模型：L表示亮度，a和b是两个颜色通道，两者的取值区间都是-128到+127。
-  
+
     ​						其中a通道数值由小到大对应的颜色是从绿色变成红色，b通道数值由小到大对应的						颜色是从蓝色变成黄色。
-  
+
   - GRAY颜色模型：是灰度图像的模型，灰度图像只有单通道，灰度值根据图像位数不同由0到最大   
-  
+
     ​                            依次表示由黑到白
-  
+
   - 不同颜色模型间的互相转换：
-  
+
     如果转换过程中添加了alpha通道（RGB模型中第四个通道，表示透明度），则其值将设置为相应通道范围的最大值：CV_8U为255，CV_16U为65535，CV_32F为1。
-  
+
     ```c++
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -572,13 +573,13 @@
     	return 0;
     }
     ```
-  
+
 - 图像像素统计
 
   - Point(x,y)对应于图像的行和列表示为Point(列数，行数)
-  
+
   - 寻找图像像素最大值与最小值
-  
+
     ```c++
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -614,12 +615,13 @@
     	return 0;
     }
     ```
-  
+
   - 计算图像的均值和标准方差
-  
-    	- 图像的均值表示图像整体的亮暗程度，均值越大图像整体越亮
-    	- 图像的标准方差表示图像中明暗变化的对比程度，标准方差越大图像中明暗变化越明显
-  
+
+    - 图像的均值表示图像整体的亮暗程度，均值越大图像整体越亮
+
+     - 图像的标准方差表示图像中明暗变化的对比程度，标准方差越大图像中明暗变化越明显
+
   ```c++
   #include <opencv2/opencv.hpp>
   #include <iostream>
@@ -672,11 +674,11 @@
   	return 0;
   }
   ```
-  
+
 - 两图像间的像素操作
 
   - 两张图像的比较运算
-  
+
     ```c#
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -746,9 +748,9 @@
     	return 0;
     }
     ```
-  
+
   - 两张图像的逻辑运算
-  
+
     ```c++
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -798,7 +800,7 @@
     	return 0;
     }
     ```
-  
+
 - 图像LUT查找表：需要与多个阈值进行比较时使用。LUT查找表简单来说就是一个像素灰度值的映射表，它以像素灰度值作为索引，以灰度值映射后的数值作为表中的内容。
 
   ```c++
@@ -958,7 +960,7 @@
 - 图像仿射变换：就是图像的旋转、平移和缩放操作的统称。
 
   实现图像的旋转首先需要确定旋转角度和旋转中心，之后确定旋转矩阵，最终通过仿射变换实现图像旋转。
-  
+
   ```c++
   #include <opencv2/opencv.hpp>
   #include <iostream>
@@ -1008,9 +1010,9 @@
   	return 0;
   }
   ```
-  
+
   ![image-20200727161141003](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727161141003.png)
-  
+
 - 图像透视变换：按照物体成像投影规律进行变换，即将物体重新投影到新的成像平面，通过图像的透视变换实现对物体图像的校正
 
   ```c++
@@ -1055,9 +1057,9 @@
   	return 0;
   }
   ```
-  
+
   ![image-20200727163918034](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727163918034.png)
-  
+
 - 图像连接：将两个具有相同高度或者宽度的图像连接在一起
 
   ```c++
@@ -1236,20 +1238,20 @@
 - 图像金字塔：通过多个分辨率表示图像的一种有效且简单的结构。
 
   金字塔的底部是待处理图像的高分辨率表示，而顶部是低分辨率的表示。
-  
+
   - 高斯金字塔：是解决尺度不确定性的一种常用方法。通过底层图像构建上层图像。
-  
+
     - 通过下采样不断的将图像的尺寸缩小，进而在金字塔中包含多个尺度的图像。
-  
+
     - 一般情况下，高斯金字塔的底部为图像的原图，每上一层就会通过下采样缩小一次图像的尺寸，通过情况尺寸会缩小为原来的一半。常见的层数为3到6层。
     - pyrDown()用于实现图像模糊并对其进行下采样计算，最终实现尺寸缩小的下采样图像。
-  
+
     ![image-20200729205330337](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200729205330337.png)
-  
+
   - 拉普拉斯金字塔：具有预测残差的作用，需与高斯金字塔一起使用。通过上层小尺寸的图像构建下层大尺寸的图像。
-  
+
     - pyrUp()用于实现图像的上采样。
-  
+
   ```c++
   #include <opencv2/opencv.hpp>
   #include <iostream>
@@ -1309,13 +1311,13 @@
   	return 0;
   }
   ```
-  
+
 - 窗口交互操作
 
   - 图像窗口滑动条：能够改变参数数值的滑动条
-  
+
     通过滑动条改变图像亮度，程序中滑动条控制图像亮度系数，将图像原始灰度值乘以亮度系数得到最终的图像。
-  
+
     ```c++
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -1353,11 +1355,11 @@
     	imshow("滑动条改变图像亮度", img2);
     }
     ```
-  
+
   - 鼠标交互响应
-  
+
     绘制鼠标移动轨迹
-  
+
     ```c++
     #include <opencv2/opencv.hpp>
     #include <iostream>
@@ -1422,11 +1424,230 @@
     	}
     }
     ```
-  
-- 
+
+- 图像直方图绘制：
+
+  - 图像直方图是图像处理中非常重要的像素统计结果，图像直方图不再表征任何的图像纹理信息，而是对图像像素的统计。具有平移不变性、放缩不变性。
+
+  - 图像直方图简单来说就是统计图像中每个灰度值的个数，之后将图像灰度值作为横轴，以灰度值个数或者灰度值所占比率作为纵轴绘制的统计图。
+
+  - 通过直方图可以看出图像中哪些灰度值数目较多，哪些较少，可以通过一定的方法将灰度值较为集中的区域映射到较为稀疏的区域，从而使得图像在像素灰度值上分布更加符合期望状态。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("apple.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat gray;
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    
+    	//设置提取直方图的相关变量
+    	Mat hist;		//用于存放直方图计算结果
+    	const int channels[1] = { 0 };		//通道索引
+    	float inRanges[2] = { 0,255 };
+    	const float*ranges[1] = { inRanges };		//像素灰度值范围
+    	const int bins[1] = { 256 };		//直方图的维度，其实就是像素灰度值的最大值
+    	calcHist(&img, 1, channels, Mat(), hist, 1, bins, ranges);	//计算图像直方图
+    	//准备绘制直方图
+    	int hist_w = 512;
+    	int hist_h = 400;
+    	int width = 2;
+    	Mat histImage = Mat::zeros(hist_h, hist_w, CV_8UC3);
+    	for (int i = 1; i <= hist.rows; i++)
+    	{
+    		rectangle(histImage, Point(width*(i - 1), hist_h - 1),
+    			Point(width*i - 1, hist_h - cvRound(hist.at<float>(i - 1) / 20)),
+    			Scalar(255, 255, 255), -1);
+    	}
+    	namedWindow("histImage", WINDOW_AUTOSIZE);
+    	imshow("histImage", histImage);
+    	imshow("gray", gray);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200730191019789](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730191019789.png)
+
+- 直方图操作
+
+  - 直方图归一化
+
+    - 用每个灰度值像素的数目占一幅图像中所有像素数目的比例来表示某个灰度值数目的多少
+
+    - 寻找统计结果中最大数值，把所有结果除以这个最大数值，从而将所有数据都缩放到0到1之间
+
+      ```c++
+      #include <opencv2/opencv.hpp>
+      #include <iostream>
+      
+      using namespace cv;
+      using namespace std;
+      
+      int main()
+      {
+      	//更改输出界面颜色
+      	system("color F0");
+      	vector<double> positiveData = { 2.0,8.0,10.0 };
+      	vector<double> normalized_L1, normalized_L2, normalized_Inf, normalized_L2SQR;
+      	//测试不同归一化方法
+      	normalize(positiveData, normalized_L1, 1.0, 0.0, NORM_L1);	//绝对值求和归一化
+      	cout << "normalized_L1=[" << normalized_L1[0] << ","
+      		<< normalized_L1[1] << "," << normalized_L1[2] << "]" << endl;
+      
+      	normalize(positiveData, normalized_L2, 1.0, 0.0, NORM_L2);	//模长归一化
+      	cout << "normalized_L2=[" << normalized_L2[0] << ","
+      		<< normalized_L2[1] << "," << normalized_L2[2] << "]" << endl;
+      
+      	normalize(positiveData, normalized_Inf, 1.0, 0.0, NORM_INF);		//最大值归一化
+      	cout << "normalized_Inf=[" << normalized_Inf[0] << ","
+      		<< normalized_Inf[1] << "," << normalized_Inf[2] << "]" << endl;
+      
+      	normalize(positiveData, normalized_L2SQR, 1.0, 0.0, NORM_MINMAX);		//偏移归一化
+      	cout << "normalized_MINMAX=[" << normalized_L2SQR[0] << ","
+      		<< normalized_L2SQR[1] << "," << normalized_L2SQR[2] << "]" << endl;
+      
+      	//将图像直方图归一化
+      	Mat img = imread("apple.jpg");
+      	if (img.empty())
+      	{
+      		cout << "请确认图像文件名称是否正确" << endl;
+      		return -1;
+      	}
+      	Mat gray, hist;
+      	cvtColor(img, gray, COLOR_BGR2GRAY);
+      	const int channels[1] = { 0 };		//通道索引
+      	float inRanges[2] = { 0,255 };
+      	const float*ranges[1] = { inRanges };		//像素灰度值范围
+      	const int bins[1] = { 256 };		//直方图的维度，其实就是像素灰度值的最大值
+      	calcHist(&gray, 1, channels, Mat(), hist, 1, bins, ranges);	//计算图像直方图
+      	//准备绘制直方图
+      	int hist_w = 512;
+      	int hist_h = 400;
+      	int width = 2;
+      	Mat histImage_L1 = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	Mat histImage_Inf = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	Mat hist_L1, hist_Inf;
+      	normalize(hist, hist_L1, 1, 0, NORM_L1, -1, Mat());
+      	for (int i = 1; i <= hist_L1.rows; i++)
+      	{
+      		rectangle(histImage_L1, Point(width*(i - 1), hist_h - 1),
+      			Point(width*i - 1, hist_h - cvRound(30*hist_h*hist_L1.at<float>(i - 1) )-1),
+      			Scalar(255, 255, 255), -1);
+      	}
+      	normalize(hist, hist_Inf, 1, 0, NORM_INF, -1, Mat());
+      	for (int i = 1; i <= hist_Inf.rows; i++)
+      	{
+      		rectangle(histImage_Inf, Point(width*(i - 1), hist_h - 1),
+      			Point(width*i - 1, hist_h - cvRound(hist_h*hist_Inf.at<float>(i - 1) )- 1),
+      			Scalar(255, 255, 255), -1);
+      	}
+      	imshow("histImage_L1", histImage_L1);
+      	imshow("histImage_Inf", histImage_Inf);
+      	waitKey(0);
+      	return 0;
+      }
+      ```
+
+    ![image-20200730213425946](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730213425946.png)
+
+  - 直方图比较
+
+    - 可以通过比较两张图像的直方图特性比较两张图像的相似程度
+
+    - 通过比较两张图像的直方图分布相似性对图像进行初步的筛选与识别
+
+    - 通过观看直方图趋势可以发现即使将图像尺寸缩小，两张图像的直方图分布也有一定的相似性
+
+      ```c++
+      #include <opencv2/opencv.hpp>
+      #include <iostream>
+      
+      using namespace cv;
+      using namespace std;
+      
+      //归一化并绘制直方图函数
+      void drawHist(Mat &hist, int type, string name)
+      {
+      	int hist_w = 512;
+      	int hist_h = 400;
+      	int width = 2;
+      	Mat histImage = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	normalize(hist, hist, 1, 0, type, -1, Mat());
+      	for (int i = 1; i <= hist.rows; i++)
+      	{
+      		rectangle(histImage, Point(width*(i - 1), hist_h - 1),
+      			Point(width*i - 1, hist_h - cvRound(30 * hist_h*hist.at<float>(i - 1)) - 1),
+      			Scalar(255, 255, 255), -1);
+      	}
+      	imshow(name, histImage);
+      }
+      
+      int main()
+      {
+      	//更改输出界面颜色
+      	system("color F0");
+      	Mat img = imread("apple.jpg");
+      	if (img.empty())
+      	{
+      		cout << "请确认图像文件名称是否正确" << endl;
+      		return -1;
+      	}
+      	Mat gray, hist,gray2,hist2,gray3,hist3;
+      	//将读取的图像转成灰度图像
+      	cvtColor(img, gray, COLOR_BGR2GRAY);
+      	//将图像缩小为原来尺寸的一半
+      	resize(gray, gray2, Size(), 0.5, 0.5);
+      	gray3 = imread("lena.jpg", IMREAD_GRAYSCALE);
+      	const int channels[1] = { 0 };		//通道索引
+      	float inRanges[2] = { 0,255 };
+      	const float*ranges[1] = { inRanges };		//像素灰度值范围
+      	const int bins[1] = { 256 };		//直方图的维度，其实就是像素灰度值的最大值
+      	calcHist(&gray, 1, channels, Mat(), hist, 1, bins, ranges);	//计算图像直方图
+      	calcHist(&gray2, 1, channels, Mat(), hist2, 1, bins, ranges);	//计算图像直方图
+      	calcHist(&gray3, 1, channels, Mat(), hist3, 1, bins, ranges);	//计算图像直方图
+      	drawHist(hist, NORM_INF, "hist");
+      	drawHist(hist2, NORM_INF, "hist2");
+      	drawHist(hist3, NORM_INF, "hist3");
+      	//原图直方图与原图直方图的相关系数
+      	double hist_hist = compareHist(hist, hist, HISTCMP_CORREL);
+      	cout << "apple_apple=" << hist_hist << endl;		//apple_apple = 1
+      	//原图直方图与缩小原图直方图的相关系数
+      	double hist_hist2 = compareHist(hist, hist2, HISTCMP_CORREL);
+      	cout << "apple_apple256=" << hist_hist2 << endl;		//apple_apple256 = 0.999968
+      	//两张不同图像直方图相关系数
+      	double hist_hist3 = compareHist(hist, hist3, HISTCMP_CORREL);
+      	cout << "apple_lena=" << hist_hist3 << endl;		//apple_lena = -0.0996329
+      	waitKey(0);
+      	return 0;
+      }
+      ```
+
+- 直方图应用
 
 - 
 
 - 
 
-  
+- 
+
+
+
+
+
+
+
+
+
+
+
