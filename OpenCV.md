@@ -1633,9 +1633,78 @@
       }
       ```
 
+  ![image-20200730221324738](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730221324738.png)
+
 - 直方图应用
 
-- 
+  - 直方图均衡化
+
+    - 如果图像的直方图都集中在一个区域，则整体图像的对比度较小，不便于图像中纹理的识别。
+
+    - 如果通过映射关系，将图像中灰度值的范围扩大，增加原来两个灰度值之间的差值，就可以提高图像的对比度，进而将图像中的纹理突出显现出来，这个过程称为图像直方图均衡化。
+    
+    - 可以自动的改变图像直方图的分布形式。
+    
+      ```c++
+      #include <opencv2/opencv.hpp>
+      #include <iostream>
+      
+      using namespace cv;
+      using namespace std;
+      
+      //归一化并绘制直方图函数
+      void drawHist(Mat &hist, int type, string name)
+      {
+      	int hist_w = 512;
+      	int hist_h = 400;
+      	int width = 2;
+      	Mat histImage = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	normalize(hist, hist, 1, 0, type, -1, Mat());
+      	for (int i = 1; i <= hist.rows; i++)
+      	{
+      		rectangle(histImage, Point(width*(i - 1), hist_h - 1),
+      			Point(width*i - 1, hist_h - cvRound(30 * hist_h*hist.at<float>(i - 1)) - 1),
+      			Scalar(255, 255, 255), -1);
+      	}
+      	imshow(name, histImage);
+      }
+      
+      int main()
+      {
+      	Mat img = imread("gearwheel.jpg");
+      	if (img.empty())
+      	{
+      		cout << "请确认图像文件名称是否正确" << endl;
+      		return -1;
+      	}
+      	Mat gray, hist, hist2;
+      	//将读取的图像转成灰度图像
+      	cvtColor(img, gray, COLOR_BGR2GRAY);
+      	Mat equalImg;
+      	//将直方图图像均衡化  该函数只能对单通道的灰度图进行直方图均衡化
+      	equalizeHist(gray, equalImg);
+      	const int channels[1] = { 0 };		//通道索引
+      	float inRanges[2] = { 0,255 };
+      	const float*ranges[1] = { inRanges };		//像素灰度值范围
+      	const int bins[1] = { 256 };		//直方图的维度，其实就是像素灰度值的最大值
+      	calcHist(&gray, 1, channels, Mat(), hist, 1, bins, ranges);	//计算图像直方图
+      	calcHist(&equalImg, 1, channels, Mat(), hist2, 1, bins, ranges);	//计算图像直方图
+      	drawHist(hist, NORM_INF, "hist");
+      	drawHist(hist2, NORM_INF, "hist2");
+      	imshow("原图", gray);
+      	imshow("均衡化后的图像", equalImg);
+      	waitKey(0);
+      	return 0;
+      }
+      ```
+    
+      ![image-20200801120432113](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200801120432113.png)
+    
+  - 直方图匹配
+
+    - 将直方图映射成指定分布形式的算法称为直方图匹配或者直方图规定化。
+    - 直方图匹配与直方图均衡化相似，都是对图像的直方图分布形式进行改变，只是直方图均衡化后的图像直方图是均匀分布的，而直方图匹配后的直方图可以随意指定分布形式。
+    - 直方图匹配操作能够有目的的增强某个灰度区间，相比于直方图均衡化操作，该算法虽然多了一个输入，但是其变换后的结果也更加灵活。
 
 - 
 
