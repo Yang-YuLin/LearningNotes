@@ -1703,10 +1703,185 @@
   - 直方图匹配
 
     - 将直方图映射成指定分布形式的算法称为直方图匹配或者直方图规定化。
+
     - 直方图匹配与直方图均衡化相似，都是对图像的直方图分布形式进行改变，只是直方图均衡化后的图像直方图是均匀分布的，而直方图匹配后的直方图可以随意指定分布形式。
+
     - 直方图匹配操作能够有目的的增强某个灰度区间，相比于直方图均衡化操作，该算法虽然多了一个输入，但是其变换后的结果也更加灵活。
 
-- 
+    - 通过构建原直方图累积概率与目标直方图累积概率之间的差值表，寻找原直方图中灰度值n的累积概率与目标直方图中所有灰度值累积概率差值的最小值，这个最小值对应的灰度值r就是n匹配后的灰度值。
+
+    - 程序中待匹配的原图是一个图像整体偏暗的图像，目标直方图分配形式来自于一张较为明亮的图像，经过图像直方图匹配操作之后，提高了图像的整体亮度，图像直方图分布也更加均匀。
+
+      ```c++
+      #include <opencv2/opencv.hpp>
+      #include <iostream>
+      
+      using namespace cv;
+      using namespace std;
+      
+      //归一化并绘制直方图函数
+      void drawHist(Mat &hist, int type, string name)
+      {
+      	int hist_w = 512;
+      	int hist_h = 400;
+      	int width = 2;
+      	Mat histImage = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	normalize(hist, hist, 1, 0, type, -1, Mat());
+      	for (int i = 1; i <= hist.rows; i++)
+      	{
+      		rectangle(histImage, Point(width*(i - 1), hist_h - 1),
+      			Point(width*i - 1, hist_h - cvRound(20 * hist_h*hist.at<float>(i - 1)) - 1),
+      			Scalar(255, 255, 255), -1);
+      	}
+      	imshow(name, histImage);
+      }
+      
+      int main()
+      {
+      	Mat img1 = imread("histMatch.jpg");
+      	Mat img2 = imread("bright.jpg");
+      	if (img1.empty() || img2.empty())
+      	{
+      		cout << "请确认图像文件名称是否正确" << endl;
+      		return -1;
+      	}
+      	Mat hist1, hist2;
+      	//计算两张图像直方图
+      	const int channels[1] = { 0 };
+      	float inRanges[2] = { 0,255 };
+      	const float* ranges[1] = { inRanges };
+      	const int bins[1] = { 256 };
+      	calcHist(&img1, 1, channels, Mat(), hist1, 1, bins, ranges);	//计算图像直方图
+      	calcHist(&img2, 1, channels, Mat(), hist2, 1, bins, ranges);	//计算图像直方图
+      	//归一化两张图像的直方图
+      	drawHist(hist1, NORM_L1, "hist1");
+      	drawHist(hist2, NORM_L1, "hist2");
+      	//计算两张图像直方图的累积概率
+      	float hist1_cdf[256] = { hist1.at<float>(0) };
+      	float hist2_cdf[256] = { hist2.at<float>(0) };
+      	for (int i = 1; i < 256; i++)
+      	{
+      		hist1_cdf[i] = hist1_cdf[i - 1] + hist1.at<float>(i);
+      		hist2_cdf[i] = hist2_cdf[i - 1] + hist2.at<float>(i);
+      	}
+      	//构建累计概率误差矩阵
+      	float diff_cdf[256][256];
+      	for (int i = 0; i < 256; i++)
+      	{
+      		for (int j = 0; j < 256; j++)
+      		{
+      			diff_cdf[i][j] = fabs(hist1_cdf[i] - hist2_cdf[j]);
+      		}
+      	}
+      
+      	//生成LUT查找表
+      	Mat lut(1, 256, CV_8U);
+      	for (int i = 0; i < 256; i++)
+      	{
+      		//查找源灰度级为i的映射灰度
+      		//和i的累积概率差值最小的规定化灰度
+      		float min = diff_cdf[i][0];
+      		int index = 0;
+      		//寻找累积概率误差矩阵中每一行中的最小值
+      		for (int j = 1; j < 256; j++)
+      		{
+      			if (min > diff_cdf[i][j])
+      			{
+      				min = diff_cdf[i][j];
+      				index = j;
+      			}
+      		}
+      		lut.at<uchar>(i) = (uchar)index;
+      	}
+      	Mat result, hist3;
+      	LUT(img1, lut, result);
+      	imshow("待匹配图像", img1);
+      	imshow("匹配的模板图像", img2);
+      	imshow("直方图匹配结果", result);
+      	calcHist(&result, 1, channels, Mat(), hist3, 1, bins, ranges);
+      	//绘制匹配后的图像直方图
+      	drawHist(hist3, NORM_L1, "hist3");
+      	waitKey(0);
+      	return 0;
+      }
+      ```
+
+      ![image-20200810145601973](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810145601973.png)
+
+      ![image-20200810145709266](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810145709266.png)
+
+  - 直方图反向投影
+
+    - 如果一张图像的某个区域中显示的是一种结构纹理或者一个独特的形状，那么这个区域的直方图就可以看作是这个结构或者形状的概率函数，在图像中寻找这种概率分布就是在图像中寻找该结构纹理或者独特形状。
+    
+    - 反向投影是一种记录给定图像中的像素点如何适应直方图模型像素分布方式的一种方法。
+    
+    - 反向投影就是首先计算某一特征的直方图模型，然后使用模型去寻找图像中是否存在该特征的方法。
+    
+    - 该函数用于在输入图像中寻找与特定图像最匹配的点或者区域，即对图像进行反向投影。
+    
+    - 该函数输入参数与计算图像直方图函数calcHist()大致相似，都需要输入图像和需要进行反向投影的通道索引数目。区别之处在于该函数需要输入模板图像的直方图统计结果，并返回的是一张图像，而不是直方图统计结果。
+    
+    - ```c++
+      #include<opencv2/opencv.hpp>
+      #include <iostream>
+      
+      using namespace cv;
+      using namespace std;
+      
+      //归一化并绘制直方图函数
+      void drawHist(Mat &hist, int type, string name)
+      {
+      	int hist_w = 512;
+      	int hist_h = 400;
+      	int width = 2;
+      	Mat histImage = Mat::zeros(hist_h, hist_w, CV_8UC3);
+      	normalize(hist, hist, 255, 0, type, -1, Mat());
+      	namedWindow(name, WINDOW_NORMAL);
+      	imshow(name, hist);
+      }
+      
+      int main()
+      {
+      	Mat img = imread("apple.jpg");
+      	Mat sub_img = imread("sub_apple.jpg");
+      	Mat img_HSV, sub_HSV, hist, hist2;
+      	if (img.empty() || sub_img.empty())
+      	{
+      		cout << "请确认图像文件名称是否正确" << endl;
+      		return -1;
+      	}
+      
+      	imshow("img", img);
+      	imshow("sub_img", sub_img);
+      	//转成HSV空间，提取H、S两个通道
+      	cvtColor(img, img_HSV, COLOR_BGR2HSV);
+      	cvtColor(sub_img, sub_HSV, COLOR_BGR2HSV);
+      	int h_bins = 32;
+      	int s_bins = 32;
+      	int histSize[] = { h_bins,s_bins };
+      	//H通道值的范围由0到179
+      	float h_ranges[] = { 0,180 };
+      	//S通道的范围由0到255
+      	float s_ranges[] = { 0,256 };
+      	//每个通道的范围
+      	const float* ranges[] = { h_ranges,s_ranges };
+      	//统计的通道索引
+      	int channels[] = { 0,1 };
+      	//绘制H-S二维直方图
+      	calcHist(&sub_HSV, 1, channels, Mat(), hist, 2, histSize, ranges, true, false);
+      	//直方图归一化并绘制直方图
+      	drawHist(hist, NORM_INF, "hist");
+      	Mat backproj;
+      	//直方图反向投影
+      	calcBackProject(&img_HSV, 1, channels, hist, backproj, ranges, 1.0);
+      	imshow("反向投影结果", backproj);
+      	waitKey(0);
+      	return 0;
+      }
+      ```
+    
+      ![image-20200810203430856](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810203430856.png)
 
 - 
 
