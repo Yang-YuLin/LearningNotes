@@ -1883,7 +1883,160 @@
     
       ![image-20200810203430856](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810203430856.png)
 
-- 
+- 图像卷积
+
+  - 虽然卷积前后图像内容一致，但是图像整体变得模糊一些，可见图像卷积具有对图像模糊的作用。
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//待卷积矩阵
+  	uchar points[25] = { 1,2,3,4,5,
+  	6,7,8,9,10,
+  	11,12,13,14,15,
+  	16,17,18,19,20,
+  	21,22,23,24,25 };
+  	Mat img(5, 5, CV_8UC1, points);
+  	//卷积模板
+  	Mat kernel = (Mat_<float>(3, 3) << 1, 2, 1,
+  		2, 0, 2,
+  		1, 2, 1);
+  	//卷积模板归一化
+  	Mat kernel_norm = kernel / 12;
+  	//未归一化卷积结果和归一化卷积结果
+  	Mat result, result_norm;
+  	filter2D(img, result, CV_32F, kernel, Point(-1, -1), 2, BORDER_CONSTANT);
+  	filter2D(img, result_norm, CV_32F, kernel_norm, Point(-1, -1), 2, BORDER_CONSTANT);
+  	cout << "result：" << endl << result << endl;
+  	cout << "result_norm：" << endl << result_norm << endl;
+  	//图像卷积
+  	Mat lena = imread("lena.jpg");
+  	if (lena.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	Mat lena_filter;
+  	filter2D(lena, lena_filter, -1, kernel_norm, Point(-1, -1), 2, BORDER_CONSTANT);
+  	imshow("lena", lena);
+  	imshow("lena_filter", lena_filter);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
+- 图像噪声的种类与生成
+
+  - 图像中常见的噪声主要有四种：高斯噪声、椒盐噪声(脉冲噪声)、泊松噪声、乘性噪声
+
+  - 椒盐噪声：会随机改变图像中的像素值，随机出现在图像中的任意位置
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    //盐噪声函数
+    void saltAndPepper(cv::Mat image, int n)
+    {
+    	for (int k = 0; k < n / 2; k++)
+    	{
+    		//随机确定图像中位置
+    		int i, j;
+    		//取余数运算，保证在图像的列数内
+    		i = std::rand() % image.cols;
+    		//取余数运算，保证在图像的行数内
+    		j = std::rand() % image.rows;
+    		//判定为白色噪声还是黑色噪声的变量
+    		int write_black = std::rand() % 2;
+    		//添加白色噪声
+    		if (write_black == 0)
+    		{
+    			//处理灰度图像
+    			if (image.type() == CV_8UC1)
+    			{
+    				//白色噪声
+    				image.at<uchar>(j, i) = 255;
+    			}
+    			//处理彩色图像
+    			else if (image.type() == CV_8UC3)
+    			{
+    				//Vec3b为opencv定义的3个值的向量类型  
+    				//[]指定通道，B:0，G:1，R:2 
+    				image.at<Vec3b>(j, i)[0] = 255;
+    				image.at<Vec3b>(j, i)[1] = 255;
+    				image.at<Vec3b>(j, i)[2] = 255;
+    			}
+    		}
+    		//添加黑色噪声
+    		else
+    		{
+    			//处理灰度图像
+    			if (image.type() == CV_8UC1)
+    			{
+    				//白色噪声
+    				image.at<uchar>(j, i) = 0;
+    			}
+    			//处理彩色图像
+    			else if (image.type() == CV_8UC3)
+    			{
+    				//Vec3b为opencv定义的3个值的向量类型  
+    				image.at<Vec3b>(j, i)[0] = 0;
+    				image.at<Vec3b>(j, i)[1] = 0;
+    				image.at<Vec3b>(j, i)[2] = 0;
+    			}
+    		}
+    	}
+    }
+    
+    int main()
+    {
+    	Mat lena = imread("lena.jpg");
+    	Mat equalLena = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	if (lena.empty() || equalLena.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	imshow("lena原图", lena);
+    	imshow("equalLena原图", equalLena);
+    	//彩色图像添加椒盐噪声
+    	saltAndPepper(lena, 10000);
+    	//灰度图像添加椒盐噪声
+    	saltAndPepper(equalLena, 10000);
+    	imshow("lena添加噪声", lena);
+    	imshow("equalLena噪声", equalLena);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200810220513101](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810220513101.png)
+
+    ![image-20200810220606851](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810220606851.png)
+
+  - 高斯噪声：出现在图像中的所有位置
+
+    
+
+- 测试
+- 测试
+
+
+
+
+
+
+
+
 
 
 
