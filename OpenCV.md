@@ -2072,8 +2072,61 @@
 - 均值滤波
 
   - 均值滤波将滤波器内所有的像素值都看作中心像素值的测量，将滤波器内所有的像素值的平均值作为滤波器中心处图像像素值。
+
   - 滤波器内的每个数据表示对应的像素在决定中心像素值的过程中所占的权重，由于滤波器内所有的像素值在决定中心像素值的过程中占有相同的权重，因此滤波器内每个数据都相等。
+
   - 均值滤波的优点是在像素值变换趋势一致的情况下，可以将受噪声影响而突然变化的像素值修正到接近周围像素值变化的一致性下。但是这种滤波方式会缩小像素值之间的差距，使得细节信息变得更加模糊，滤波器范围越大，变模糊的效果越明显。
+
+    ```c++
+    //利用不同尺寸的均值滤波器分别处理不含有噪声的图像、含有椒盐噪声和高斯噪声的图像
+    //滤波器的尺寸越大，滤波后图像变得越模糊
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat equalLena = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	Mat equalLena_gauss = imread("equalLena_gauss.jpg", IMREAD_ANYDEPTH);
+    	Mat equalLena_salt = imread("equalLena_salt.jpg", IMREAD_ANYDEPTH);
+    	if (equalLena.empty() || equalLena_gauss.empty() || equalLena_salt.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	//存放不含噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_3, result_9;
+    	//存放含有椒盐噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_3salt, result_9salt;
+    	//存放含有高斯噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_3gauss, result_9gauss;
+    	//调用均值滤波函数blur()进行滤波
+    	blur(equalLena, result_3, Size(3, 3));
+    	blur(equalLena, result_9, Size(9, 9));
+    	blur(equalLena_salt, result_3salt, Size(3, 3));
+    	blur(equalLena_salt, result_9salt, Size(9, 9));
+    	blur(equalLena_gauss, result_3gauss, Size(3, 3));
+    	blur(equalLena_gauss, result_9gauss, Size(9, 9));
+    	//显示不含噪声图像
+    	imshow("equalLena", equalLena);
+    	imshow("result_3", result_3);
+    	imshow("result_9", result_9);
+    	//显示含有椒盐噪声图像
+    	imshow("equalLena_salt", equalLena_salt);
+    	imshow("result_3salt", result_3salt);
+    	imshow("result_9salt", result_9salt);
+    	//显示含有高斯噪声图像
+    	imshow("equalLena_gauss", equalLena_gauss);
+    	imshow("result_3gauss", result_3gauss);
+    	imshow("result_9gauss", result_9gauss);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    
 
 - 方框滤波
 
