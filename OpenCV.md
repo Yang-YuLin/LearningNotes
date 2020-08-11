@@ -1938,6 +1938,7 @@
   - 椒盐噪声：会随机改变图像中的像素值，随机出现在图像中的任意位置
 
     ```c++
+    //在图像中添加椒盐噪声
     #include <opencv2/opencv.hpp>
     #include <iostream>
     
@@ -2025,12 +2026,62 @@
 
   - 高斯噪声：出现在图像中的所有位置
 
+    ```c++
+    //在图像中添加高斯噪声
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
     
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat lena = imread("lena.jpg");
+    	Mat equalLena = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	if (lena.empty() || equalLena.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	//生成与原图像同尺寸、数据类型和通道数的矩阵
+    	Mat lena_noise = Mat::zeros(lena.rows, lena.cols, lena.type());
+    	Mat equalLena_noise = Mat::zeros(equalLena.rows, equalLena.cols, equalLena.type());
+    	imshow("lena原图", lena);
+    	imshow("equalLena原图", equalLena);
+    	//创建一个RNG类
+    	RNG rng;
+    	//生成三通道的高斯分布随机数
+    	rng.fill(lena_noise, RNG::NORMAL, 10, 20);
+    	rng.fill(equalLena_noise, RNG::NORMAL, 15, 30);
+    	imshow("三通道高斯噪声", lena_noise);
+    	imshow("单通道高斯噪声", equalLena_noise);
+    	//在彩色图像中添加高斯噪声
+    	lena = lena + lena_noise;
+    	//在灰度图像中添加高斯噪声
+    	equalLena = equalLena + equalLena_noise;
+    	//显示添加高斯噪声后的图像
+    	imshow("lena添加噪声", lena);
+    	imshow("equalLena添加噪声", equalLena);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+    
+    ![image-20200811112442481](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200811112442481.png)
 
-- 测试
-- 测试
+- 均值滤波
 
+  - 均值滤波将滤波器内所有的像素值都看作中心像素值的测量，将滤波器内所有的像素值的平均值作为滤波器中心处图像像素值。
+  - 滤波器内的每个数据表示对应的像素在决定中心像素值的过程中所占的权重，由于滤波器内所有的像素值在决定中心像素值的过程中占有相同的权重，因此滤波器内每个数据都相等。
+  - 均值滤波的优点是在像素值变换趋势一致的情况下，可以将受噪声影响而突然变化的像素值修正到接近周围像素值变化的一致性下。但是这种滤波方式会缩小像素值之间的差距，使得细节信息变得更加模糊，滤波器范围越大，变模糊的效果越明显。
 
+- 方框滤波
+
+- 高斯滤波
+
+- 可分离滤波
+
+- 中值滤波
 
 
 
