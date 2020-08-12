@@ -2071,7 +2071,7 @@
 
 - 均值滤波
 
-  - 均值滤波将滤波器内所有的像素值都看作中心像素值的测量，将滤波器内所有的像素值的平均值作为滤波器中心处图像像素值。
+  - 均值滤波将滤波器内所有的像素值都看作中心像素值的测量，将滤波器内所有的像素值求和后的平均值作为滤波器中心处图像像素值。
 
   - 滤波器内的每个数据表示对应的像素在决定中心像素值的过程中所占的权重，由于滤波器内所有的像素值在决定中心像素值的过程中占有相同的权重，因此滤波器内每个数据都相等。
 
@@ -2126,9 +2126,64 @@
     }
     ```
 
-    
-
 - 方框滤波
+
+  - 方框滤波也是求滤波器内所有像素值的之和，但是方框滤波可以选择不进行归一化，就是将所有像素值的和作为滤波结果，而不是所有像素值的平均值。
+
+  - **在归一化后图像在变模糊的同时亮度也会变暗**。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat equalLena = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	if (equalLena.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	//验证方框滤波算法的数据矩阵
+    	float points[25] = { 1,2,3,4,5,
+    		6,7,8,9,10,
+    		11,12,13,14,15,
+    		16,17,18,19,20,
+    		21,22,23,24,25 };
+    	Mat data(5, 5, CV_32FC1, points);
+    	//将CV_8U类型转换成CV_32F类型
+    	Mat equalLena_32F;
+    	equalLena.convertTo(equalLena_32F, CV_32F, 1.0 / 255);
+    	Mat resultNorm, result, dataSqrNorm, dataSqr, equalLena_32FSqrNorm, equalLena_32FSqr;
+    	//方框滤波boxFilter()和sqrBoxFilter()
+    	//进行归一化
+    	boxFilter(equalLena, resultNorm, -1, Size(3, 3), Point(-1, -1), true);
+    	//不进行归一化
+    	boxFilter(equalLena, result, -1, Size(3, 3), Point(-1, -1), false);
+    
+    	//进行归一化
+    	sqrBoxFilter(data, dataSqrNorm, -1, Size(3, 3), Point(-1, -1), true, BORDER_CONSTANT);
+    	//不进行归一化
+    	sqrBoxFilter(data, dataSqr, -1, Size(3, 3), Point(-1, -1), false, BORDER_CONSTANT);
+    	
+    	//进行归一化
+    	sqrBoxFilter(equalLena_32F, equalLena_32FSqrNorm, -1, Size(3, 3), Point(-1, -1), true, BORDER_CONSTANT);
+    	//不进行归一化
+    	sqrBoxFilter(equalLena_32F, equalLena_32FSqr, -1, Size(3, 3), Point(-1, -1), false, BORDER_CONSTANT);
+    	
+    	//显示处理结果
+    	imshow("resultNorm", resultNorm);
+    	imshow("result", result);
+    	imshow("FF", equalLena_32F);
+    	imshow("equalLena_32FSqrNorm", equalLena_32FSqrNorm);
+    	imshow("equalLena_32FSqr", equalLena_32FSqr);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
 
 - 高斯滤波
 
