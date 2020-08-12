@@ -2187,6 +2187,61 @@
 
 - 高斯滤波
 
+  - 高斯滤波器考虑了像素离滤波器中心距离的影响，以滤波器中心位置为高斯分布的均值，根据高斯分布公式和每个像素离中心位置的距离计算出滤波器内每个位置的数值，从而形成一个形如下图所示的**高斯滤波器**。之后将高斯滤波器与图像之间进行滤波操作，进而实现对图像的高斯滤波。
+
+    ![image-20200812180234354](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200812180234354.png)
+
+  - 为了了解高斯滤波对不同噪声的去除效果，在代码中利用高斯滤波分别处理不含有噪声的图像、含有椒盐噪声的图像和含有高斯噪声的图像。通过结果可以发现，高斯滤波对高斯噪声去除效果较好，但是同样会对图像造成模糊，并且滤波器的尺寸越大，滤波后图像变得越模糊。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat equalLena = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	Mat equalLena_gauss = imread("equalLena_gauss.jpg", IMREAD_ANYDEPTH);
+    	Mat equalLena_salt = imread("equalLena_salt.jpg", IMREAD_ANYDEPTH);
+    	if (equalLena.empty() || equalLena_gauss.empty() || equalLena_salt.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	//存放不含噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_5, result_9;
+    	//存放含有高斯噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_5gauss, result_9gauss;
+    	//存放含有椒盐噪声滤波结果，后面数字代表滤波器尺寸
+    	Mat result_5salt, result_9salt;
+    	//调用高斯滤波函数GaussianBlur()进行滤波
+    	GaussianBlur(equalLena, result_5, Size(5, 5), 10, 20);
+    	GaussianBlur(equalLena, result_9, Size(9, 9), 10, 20);
+    
+    	GaussianBlur(equalLena_gauss, result_5gauss, Size(5, 5), 10, 20);
+    	GaussianBlur(equalLena_gauss, result_9gauss, Size(9, 9), 10, 20);
+    
+    	GaussianBlur(equalLena_salt, result_5salt, Size(5, 5), 10, 20);
+    	GaussianBlur(equalLena_salt, result_9salt, Size(9, 9), 10, 20);
+    	//显示不含噪声图像
+    	imshow("equalLena", equalLena);
+    	imshow("result_5", result_5);
+    	imshow("result_9", result_9);
+    	//显示含有高斯噪声图像
+    	imshow("equalLena_gauss", equalLena_gauss);
+    	imshow("equalLena_5gauss", result_5gauss);
+    	imshow("equalLena_9gauss", result_9gauss);
+    	//显示含有椒盐噪声图像
+    	imshow("equalLena_salt", equalLena_salt);
+    	imshow("equalLena_5salt", result_5salt);
+    	imshow("equalLena_9salt", result_9salt);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
 - 可分离滤波
 
 - 中值滤波
