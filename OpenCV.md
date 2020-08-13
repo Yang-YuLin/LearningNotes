@@ -2244,7 +2244,120 @@
 
 - 可分离滤波
 
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//更改输出界面颜色
+  	system("color F0");
+  	float points[25] = { 1,2,3,4,5,
+  		6,7,8,9,10,
+  		11,12,13,14,15,
+  		16,17,18,19,20,
+  		21,22,23,24,25 };
+  	Mat data(5, 5, CV_32FC1, points);
+  	//X方向、Y方向和联合滤波器的构建
+  	Mat a = (Mat_<float>(3, 1) << -1, 3, -1);
+  	Mat b = a.reshape(1, 1);
+  	Mat ab = a*b;
+  	cout << "a" << a << endl;
+  	cout << "b" << b << endl;
+  	cout << "ab" << ab << endl;
+  	//验证高斯滤波的可分离性
+  	Mat gaussX = getGaussianKernel(3, 1);		//得到X方向和Y方向的滤波器
+  	Mat gaussData, gaussDataXY;
+  	GaussianBlur(data, gaussData, Size(3, 3), 1, 1, BORDER_CONSTANT);
+  	sepFilter2D(data, gaussDataXY, -1, gaussX, gaussX, Point(-1, -1), 0, BORDER_CONSTANT);
+  	//输入两种高斯滤波的计算结果
+  	cout << "gaussData=" << endl
+  		<< gaussData << endl;
+  	cout << "gaussDataXY=" << endl
+  		<< gaussDataXY << endl;
+  	//线性滤波的可分离性
+  	Mat dataYX, dataY, dataXY, dataXY_sep;
+  	filter2D(data, dataY, -1, a, Point(-1, -1), 0, BORDER_CONSTANT);
+  	filter2D(dataY, dataYX, -1, b, Point(-1, -1), 0, BORDER_CONSTANT);
+  	filter2D(data, dataXY, -1, ab, Point(-1, -1), 0, BORDER_CONSTANT);
+  	sepFilter2D(data, dataXY_sep, -1, b, b, Point(-1, -1), 0, BORDER_CONSTANT);
+  	//输出分离滤波和联合滤波的计算结果
+  	cout << "dataY=" << endl
+  		<< dataY << endl;
+  	cout << "dataYX=" << endl
+  		<< dataYX << endl;
+  	cout << "dataXY=" << endl
+  		<< dataXY << endl;
+  	cout << "dataXY_sep=" << endl
+  		<< dataXY_sep << endl;
+  	//对图像的分离操作
+  	Mat img = imread("lena.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	Mat imgYX, imgY, imgXY;
+  	filter2D(img, imgY, -1, a, Point(-1, -1), 0, BORDER_CONSTANT);
+  	filter2D(imgY, imgYX, -1, b, Point(-1, -1), 0, BORDER_CONSTANT);
+  	filter2D(img, imgXY, -1, ab, Point(-1, -1), 0, BORDER_CONSTANT);
+  	imshow("img", img);
+  	imshow("imgY", imgY);
+  	imshow("imgYX", imgYX);
+  	imshow("imgXY", imgXY);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
 - 中值滤波
+
+  - 中值滤波是用滤波器范围内所有像素值的中值来替代滤波器中心位置像素值的滤波方法。
+
+  - 相比于均值滤波，中值滤波对于脉冲干扰信号和图像扫描噪声的处理效果更佳，同时在一定条件下中值滤波对图像的边缘信息保护效果更佳，可以避免图像细节的模糊，但是当中值滤波尺寸变大之后同样会产生图像模糊的效果。
+
+  - **中值滤波可以去噪，且滤波器尺寸越大，图像越模糊。**
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//含有椒盐噪声的灰度图和彩色图
+    	Mat gray = imread("equalLena_salt.jpg", IMREAD_ANYCOLOR);
+    	Mat img = imread("lena_salt.jpg", IMREAD_ANYCOLOR);
+    	if (gray.empty() || img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	//中值滤波
+    	Mat imgResult3, grayResult3, imgResult9, grayResult9;
+    	medianBlur(img, imgResult3, 3);
+    	medianBlur(gray, grayResult3, 3);
+    	//加大滤波模板，图像滤波结果会变模糊
+    	medianBlur(img, imgResult9, 9);
+    	medianBlur(gray, grayResult9, 9);
+    	//显示滤波处理结果
+    	imshow("img", img);
+    	imshow("gray", gray);
+    	imshow("imgResult3", imgResult3);
+    	imshow("grayResult3", grayResult3);
+    	imshow("imgResult9", imgResult9);
+    	imshow("grayResult9", grayResult9);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+- 边缘检测原理
 
 
 
