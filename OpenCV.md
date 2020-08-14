@@ -2185,7 +2185,7 @@
     }
     ```
 
-- 高斯滤波
+- **高斯滤波**    可以平滑图像
 
   - 高斯滤波器考虑了像素离滤波器中心距离的影响，以滤波器中心位置为高斯分布的均值，根据高斯分布公式和每个像素离中心位置的距离计算出滤波器内每个位置的数值，从而形成一个形如下图所示的**高斯滤波器**。之后将高斯滤波器与图像之间进行滤波操作，进而实现对图像的高斯滤波。
 
@@ -2472,10 +2472,153 @@
     	return 0;
     }
     ```
+    
+    ![image-20200813211124695](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813211124695.png)
 
 - Scharr算子
 
+  - 虽然Sobel算子可以有效的提取图像边缘，但是对图像中较弱的边缘提取效果较差。
+
+  - Scharr算子为了可以有效的提取出较弱的边缘，需要将像素值间的差距增大。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//读取图像，黑白图像边缘检测结果较为明显
+    	Mat img = imread("equalLena.jpg", IMREAD_ANYCOLOR);
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat resultX, resultY, resultXY;
+    
+    	//X方向一阶边缘
+    	Scharr(img, resultX, CV_16S, 1, 0);
+    	convertScaleAbs(resultX, resultX);
+    
+    	//Y方向一阶边缘
+    	Scharr(img, resultY, CV_16S, 0, 1);
+    	convertScaleAbs(resultY, resultY);
+    
+    	//整幅图像的一阶边缘
+    	resultXY = resultX + resultY;
+    
+    	//显示图像
+    	imshow("resultX", resultX);
+    	imshow("resultY", resultY);
+    	imshow("resultXY", resultXY);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200813210902921](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813210902921.png)
+
 - Laplacian算子
+
+  - 上述的边缘检测算子都具有方向性，因此需要分别求取X方向的边缘和Y方向的边缘，之后将两个方向的边缘综合得到图像的整体边缘。Laplacian算子具有各方向同性的特点，能够对任意方向的边缘进行提取，具有无方向性的优点，因此使用Laplacian算子提取边缘不需要分别检测X方向的边缘和Y方向的边缘，只需要一次边缘检测即可。
+
+  - Laplacian算子是一种二阶导数算子，对噪声比较敏感，因此常需要配合高斯滤波一起使用。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//读取图像，黑白图像边缘检测结果较为明显
+    	Mat img = imread("equalLena.jpg", IMREAD_ANYCOLOR);
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat result, result_g, result_G;
+    
+    	//未滤波提取边缘
+    	Laplacian(img, result, CV_16S, 3, 1, 0);
+    	convertScaleAbs(result, result);
+    
+    	//滤波后提取Laplacian边缘
+    	GaussianBlur(img, result_g, Size(3,3), 5, 0);		//高斯滤波
+    	Laplacian(result_g, result_G, CV_16S, 3, 1, 0);
+    	convertScaleAbs(result_G, result_G);
+    
+    	//显示图像
+    	imshow("result", result);
+    	imshow("result_G", result_G);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200813213802273](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813213802273.png)
+
+- **Canny算法**
+
+  - **边缘检测算法**，该算法不容易受到噪声的影响,能够识别图像中的弱边缘和强边缘，并结合强弱边缘的位置关系，综合给出图像整体的边缘信息。
+
+    ```c++
+    //通过设置不同的阈值来比较阈值的大小对图像边缘检测效果的影响
+    //较高的阈值会降低噪声信息对图像提取边缘结果的影响，但是同时也会减少结果中的边缘信息
+    //同时程序中先对图像进行高斯模糊后再进行边缘检测，结果表明高斯模糊在边缘纹理较多的区域能减少边缘检测的结果，但是对纹理较少的区域影响较小
+    ```
+
+    
+
+- 图像连通域分析
+
+- 图像距离变换
+
+- 图像腐蚀
+
+- 图像膨胀
+
+- 形态学应用
+
+- 图像模板匹配
+
+- 图像二值化
+
+- 检测直线
+
+- 直线拟合
+
+- 圆形检测
+
+- 轮廓发现与绘制
+
+- 轮廓面积与长度
+
+- 轮廓外接多边形
+
+- 图像矩的计算与应用
+
+- 点集拟合
+
+- 漫水填充法
+
+- 分割图像——Grabcut图像分割
+
+- 分割图像——Mean-Shift分割算法
+
+- 图像恢复
+
+- 深度神经网络应用实例
+
+- QR二维码检测
+
+- 分割图像——分水岭法
 
 
 
