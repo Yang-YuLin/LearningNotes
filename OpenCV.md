@@ -2572,11 +2572,49 @@
     //通过设置不同的阈值来比较阈值的大小对图像边缘检测效果的影响
     //较高的阈值会降低噪声信息对图像提取边缘结果的影响，但是同时也会减少结果中的边缘信息
     //同时程序中先对图像进行高斯模糊后再进行边缘检测，结果表明高斯模糊在边缘纹理较多的区域能减少边缘检测的结果，但是对纹理较少的区域影响较小
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//读取图像，黑白图像边缘检测结果较为明显
+    	Mat img = imread("equalLena.jpg", IMREAD_ANYDEPTH);
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat resultHigh, resultLow, resultG;
+    
+    	//大阈值检测图像边缘
+    	Canny(img, resultHigh, 100, 200, 3);
+    
+    	//小阈值检测图像边缘
+    	Canny(img, resultLow, 20, 40, 3);
+    
+    	//高斯模糊后检测图像边缘
+    	GaussianBlur(img, resultG, Size(3,3), 5);		//高斯滤波
+    	Canny(resultG, resultG, 100, 200, 3);
+    
+    	//显示图像
+    	imshow("resultHigh", resultHigh);
+    	imshow("resultLow", resultLow);
+    	imshow("resultG", resultG);
+    	waitKey(0);
+    	return 0;
+    }
     ```
 
-    
+    ![image-20200814095739574](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200814095739574.png)
 
 - 图像连通域分析
+
+  - 图像的连通域是指图像中具有相同像素值并且位置相邻的像素组成的区域，连通域分析是指在图像中寻找出彼此互相独立的连通域并将其标记出来。
+  - 提取图像中不同的连通域是图像处理中较为常用的方法，例如在车牌识别、文字识别、目标检测等领域对感兴趣区域分割与识别。
+  - 一般情况下，一个连通域内只包含一个像素值，因此为了防止像素值波动对提取不同连通域的影响，连通域分析常处理的是二值化后的图像。
 
 - 图像距离变换
 
