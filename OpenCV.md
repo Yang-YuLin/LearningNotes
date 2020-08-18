@@ -2613,12 +2613,162 @@
 - 图像连通域分析
 
   - 图像的连通域是指图像中具有相同像素值并且位置相邻的像素组成的区域，连通域分析是指在图像中寻找出彼此互相独立的连通域并将其标记出来。
+
   - 提取图像中不同的连通域是图像处理中较为常用的方法，例如在车牌识别、文字识别、目标检测等领域对感兴趣区域分割与识别。
+
   - 一般情况下，一个连通域内只包含一个像素值，因此为了防止像素值波动对提取不同连通域的影响，连通域分析常处理的是二值化后的图像。
+
+    ```c++
+    //统计图像中连通域数目
+    //用不同颜色的矩形框将连通域围起来，并标记出每个连通域的质心
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	//对图像进行距离变换
+    	Mat img = imread("rice.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat rice, riceBW;
+    
+    	//将图像转换成灰度图像 
+    	cvtColor(img, rice, COLOR_BGR2GRAY);
+    	//将灰度图像转换成二值图像，用于统计连通域
+    	threshold(rice, riceBW, 50, 255, THRESH_BINARY);
+    
+    	//生成随机颜色，用于区分不同连通域
+    	RNG rng(10086);
+    	Mat out,stats,centroids;
+    	//统计图像中连通域个数
+    	//int number = connectedComponents(riceBW, out, 8, CV_16U);
+    	int number = connectedComponentsWithStats(riceBW, out, stats, centroids, 8, CV_16U);
+    	vector<Vec3b> colors;
+    	for(int i = 0; i < number; i++)
+    	{
+    		//使用均匀分布的随机数确定颜色
+    		Vec3b vec3 = Vec3b(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
+    		colors.push_back(vec3);
+    	}
+    
+    	//以不同颜色标记出不同的连通域
+    	Mat result = Mat::zeros(rice.size(), img.type());
+    	int w = result.cols;
+    	int h = result.rows;
+    	for (int i = 1; i < number; i++)
+    	{
+    		//中心位置
+    		int center_x = centroids.at<double>(i, 0);
+    		int center_y = centroids.at<double>(i, 1);
+    		//矩形边框
+    		int x = stats.at<int>(i, CC_STAT_LEFT);
+    		int y = stats.at<int>(i, CC_STAT_TOP);
+    		int w = stats.at<int>(i, CC_STAT_WIDTH);
+    		int h = stats.at<int>(i, CC_STAT_HEIGHT);
+    		int area = stats.at<int>(i, CC_STAT_AREA);
+    		//中心位置绘制
+    		circle(img, Point(center_x, center_y), 2, Scalar(0, 255, 0), 2, 8, 0);
+    		//外接矩形
+    		Rect rect(x, y, w, h);
+    		rectangle(img, rect, colors[i], 1, 8, 0);
+    		putText(img, format("%d", i), Point(center_x, center_y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 1);
+    		cout << "number：" << i << ",area：" << area << endl;
+    	}
+    	//显示结果
+    	imshow("标记后的图像", img);
+    	waitKey(0);
+    	return 0;
+    }
+  ```
+    
+
+  ![image-20200818102834555](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200818102834555.png)
 
 - 图像距离变换
 
+  - 图像中两个像素之间的距离：欧式距离、街区距离、棋盘距离。
+
+  - 欧式距离：两个像素之间的直线距离，分别计算两个像素在X方向和Y方向上的距离，之后利用勾股定理得到两个像素之间的距离。
+
+  - 街区距离：两个像素之间的距离一定为整数。
+
+  - 棋盘距离：两个像素点X方向距离和Y方向距离的最大值。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//构建建议矩阵，用于求取像素之间的距离
+    	Mat a = (Mat_<uchar>(5, 5) << 1, 1, 1, 1, 1,
+    		1, 1, 1, 1, 1,
+    		1, 1, 0, 1, 1,
+    		1, 1, 1, 1, 1,
+    		1, 1, 1, 1, 1);
+    	Mat dist_L1, dist_L2, dist_C, dist_L12;
+    
+    	//计算街区距离
+    	distanceTransform(a, dist_L1, 1, 3, CV_8U);
+    	cout << "街区距离：" << endl << dist_L1 << endl;
+    
+    	//计算欧式距离
+    	distanceTransform(a, dist_L2, 2, 5, CV_8U);
+    	cout << "欧式距离：" << endl << dist_L2 << endl;
+    
+    	//计算棋盘距离
+    	distanceTransform(a, dist_C, 3, 5, CV_8U);
+    	cout << "棋盘距离：" << endl << dist_C << endl;
+    
+    	//对图像进行距离变换
+    	Mat rice = imread("rice.jpg", IMREAD_GRAYSCALE);
+    	if (rice.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat riceBW, riceBW_INV;
+    
+    	//将图像转成二值图像，同时把黑白区域颜色互换
+    	threshold(rice, riceBW, 50, 255, THRESH_BINARY);
+    	threshold(rice, riceBW_INV, 50, 255, THRESH_BINARY_INV);
+    
+    	//距离变换
+    	Mat dist, dist_INV;
+    	//为了显示清晰，将数据类型变成CV_32F
+    	distanceTransform(riceBW, dist, 1, 3, CV_32F);
+    	distanceTransform(riceBW_INV, dist_INV, 1, 3, CV_8U);
+    
+    	//显示变换结果
+    	imshow("riceBW", riceBW);
+    	imshow("dist", dist);
+    	imshow("riceBE_INV", riceBW_INV);
+    	imshow("dist_INV", dist_INV);
+    
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+  ![image-20200818102903288](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200818102903288.png)
+
 - 图像腐蚀
+
+  - 对图像A的腐蚀运算就是寻找图像中能够将结构元素B全部包含的像素点
+  - 结构元素的尺寸大小，能够影响到图像腐蚀的效果，尺寸越大，腐蚀效果越明显
+  - 图像的腐蚀过程只针对图像中的非0像素，因此如果图像是以0像素为背景，那么腐蚀操作后会看到图像中的内容变得更瘦更小；如果图像是以255像素为背景，那么腐蚀操作后会看到图像中的内容变得更粗更大
 
 - 图像膨胀
 
