@@ -2972,11 +2972,401 @@
 
 - 形态学应用
 
+  - 开运算：可以去除图像中的噪声，消除较小连通域，保留较大连通域，同时能够在两个物体纤细的连接处将两个物体分离，并且在不明显改变较大连通域的面积的同时能够平滑连通域的边界。开运算是图像腐蚀和膨胀操作的结合，首先对图像进行腐蚀，消除图像中的噪声和较小的连通域，之后通过膨胀运算弥补较大连通域因腐蚀而造成的面积减小。
+
+  - 闭运算：可以去除连通域内的小型空洞，平滑物体轮廓，连接两个临近的连通域。闭运算是图像腐蚀和膨胀操作的结合，首先对图像进行膨胀，填充连通域内的小型空洞，扩大连通域的边界，将临近的两个连通域连接，之后通过腐蚀运算减少由膨胀运算引起的连通域边界的扩大以及面积的增加。
+
+  - 形态学梯度：能够描述目标的边界，根据图像腐蚀和膨胀与原图之间的关系计算得到，形态学梯度可以分为基本梯度、内部梯度和外部梯度。基本梯度是原图像膨胀后图像和腐蚀后图像间的差值图像，内部梯度图像是原图像和腐蚀后图像间的差值图像，外部梯度是膨胀后图像和原图像间的差值图像。
+
+  - 顶帽运算：是原图像与开运算结果之间的差值，往往用来分离比邻近点亮一些的斑块，因为开运算带来的结果是放大了裂缝或者局部低亮度的区域，因此，从原图中减去开运算后的图，得到的效果图突出了比原图轮廓周围的区域更明亮的区域。顶帽运算先对图像进行开运算，之后从原图像中减去开运算计算的结果。
+
+  - 黑帽运算：是与图像顶帽运算相对应的形态学操作，与顶帽运算相反，黑帽运算是原图像与闭运算结果之间的差值，往往用来分离比邻近点暗一些的斑块。顶帽运算先对图像进行开运算，之后从原图像中减去开运算计算的结果。
+
+  - 击中击不中变换：是比图像腐蚀要求更加苛刻的一种形态学操作，图像腐蚀只需要图像能够将结构元素中所有非0元素包含即可，但是击中击不中变换要求原图像中需要存在与结构元素一模一样的结构，即结构元素中非0元素也需要同时被考虑。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//用于验证形态学应用的二值化急诊
+    	Mat src = (Mat_<uchar>(9, 12) << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 255, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+    		   0, 255, 255, 255, 0, 255, 255, 255, 0, 0, 0, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 255, 0,
+    		   0, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+    		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    	//可以自由调节显示图像的尺寸
+    	namedWindow("src", WINDOW_NORMAL);
+    	imshow("src", src);
+    
+    	//3x3矩形结构元素
+    	Mat kernel = getStructuringElement(0, Size(3, 3));
+    
+    	//对二值化矩阵进行形态学操作
+    	Mat open, close, gradient, tophat, blackhat, hitmiss;
+    
+    	//对二值化矩阵进行开运算
+    	morphologyEx(src, open, MORPH_OPEN, kernel);
+    	namedWindow("open", WINDOW_NORMAL);
+    	imshow("open", open);
+    
+    	//对二值化矩阵进行闭运算
+    	morphologyEx(src, close, MORPH_CLOSE, kernel);
+    	namedWindow("close", WINDOW_NORMAL);
+    	imshow("close", close);
+    
+    	//对二值化矩阵进行梯度运算
+    	morphologyEx(src, gradient, MORPH_GRADIENT, kernel);
+    	namedWindow("gradient", WINDOW_NORMAL);
+    	imshow("gradient", gradient);
+    
+    	//对二值化矩阵进行顶帽运算
+    	morphologyEx(src, tophat, MORPH_TOPHAT, kernel);
+    	namedWindow("tophat", WINDOW_NORMAL);
+    	imshow("tophat", tophat);
+    
+    	//对二值化矩阵进行黑帽运算
+    	morphologyEx(src, blackhat, MORPH_BLACKHAT, kernel);
+    	namedWindow("blackhat", WINDOW_NORMAL);
+    	imshow("blackhat", blackhat);
+    
+    	//对二值化矩阵进行击中击不中变换
+    	morphologyEx(src, hitmiss, MORPH_HITMISS, kernel);
+    	namedWindow("hitmiss", WINDOW_NORMAL);
+    	imshow("hitmiss", hitmiss);
+    
+    	//用图像验证形态学操作效果
+    	Mat coin = imread("coin.jpg", IMREAD_GRAYSCALE);
+    	imshow("coin", coin);
+    	threshold(coin,coin,130, 255, THRESH_BINARY);
+    	imshow("二值化后的coin", coin);
+    
+    	//5x5矩形结构元素
+    	Mat kernel_coin = getStructuringElement(0, Size(5, 5));
+    	Mat open_coin, close_coin, gradient_coin;
+    	Mat tophat_coin, blackhat_coin, hitmiss_coin;
+    
+    	//对图像进行开运算
+    	morphologyEx(coin, open_coin, MORPH_OPEN, kernel_coin);
+    	imshow("open_coin", open_coin);
+    
+    	//对图像进行闭运算
+    	morphologyEx(coin, close_coin, MORPH_CLOSE, kernel_coin);
+    	imshow("close_coin", close_coin);
+    
+    	//对图像进行梯度运算
+    	morphologyEx(coin, gradient_coin, MORPH_GRADIENT, kernel_coin);
+    	imshow("gradient_coin", gradient_coin);
+    
+    	//对图像进行顶帽运算
+    	morphologyEx(coin, tophat_coin, MORPH_TOPHAT, kernel_coin);
+    	imshow("tophat_coin", tophat_coin);
+    
+    	//对图像进行黑帽运算
+    	morphologyEx(coin, blackhat_coin, MORPH_BLACKHAT, kernel_coin);
+    	imshow("blackhat_coin", blackhat_coin);
+    
+    	//对图像进行击中击不中变换
+    	morphologyEx(coin, hitmiss_coin, MORPH_HITMISS, kernel_coin);
+    	imshow("hitmiss_coin", hitmiss_coin);
+    
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
 - 图像模板匹配
+
+  - 通过比较图像像素的形式来搜索是否存在相同内容的方法叫做图像的模板匹配
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("lena.jpg");
+    	Mat temp = imread("lena_face.jpg");
+    	if (img.empty() || temp.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	Mat result;
+    	//模板匹配    TM_CCOEFF_NORMED：计算相关性系数
+    	matchTemplate(img, temp, result, TM_CCOEFF_NORMED);
+    	double maxVal, minVal;
+    	Point minLoc, maxLoc;
+    	//寻找相关性系数中的最大值，确定最佳匹配值的像素点坐标     图像匹配结果中的最大值和最小值以及坐标位置
+    	minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
+    	//在原图中绘制出与模板最佳匹配区域的范围
+    	rectangle(img, cv::Rect(maxLoc.x, maxLoc.y, temp.cols, temp.rows), Scalar(0, 0, 255), 2);
+    	imshow("原图", img);
+    	imshow("模板图像", temp);
+    	imshow("result", result);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
 
 - 图像二值化
 
+  - 非黑即白的图像像素的灰度值无论在什么数据类型中只有最大值和最小值两种取值，称为二值图像
+
+  - 二值图像色彩种类少，可以进行高度的压缩，节省存储空间，将非二值图像经过计算变成二值图像的过程称为图像的二值化
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace std;
+    using namespace cv;
+    
+    int main()
+    {
+    	Mat img = imread("lena.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	Mat gray;
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    	Mat img_B, img_B_V, gray_B,gray_B_V, gray_T, gray_T_V, gray_TRUNC;
+    
+    	//彩色图像二值化
+    	threshold(img, img_B, 125, 255, THRESH_BINARY);
+    	threshold(img, img_B_V, 125, 255, THRESH_BINARY_INV);
+    	imshow("img_B", img_B);
+    	imshow("img_B_V", img_B_V);
+    
+    	//灰度图BINARY二值化
+    	threshold(gray, gray_B, 125, 255, THRESH_BINARY);
+    	threshold(gray, gray_B_V, 125, 255, THRESH_BINARY_INV);
+    	imshow("gray_B", gray_B);
+    	imshow("gray_B_V", gray_B_V);
+    
+    	//灰度图像TOZERO变换
+    	threshold(gray, gray_T, 125, 255, THRESH_BINARY);
+    	threshold(gray, gray_T_V, 125, 255, THRESH_BINARY_INV);
+    	imshow("gray_T", gray_T);
+    	imshow("gray_T_V", gray_T_V);
+    
+    	//灰度图像TRUNC变换
+    	threshold(gray, gray_TRUNC, 15, 255, THRESH_TRUNC);
+    	imshow("gray_TRUNC", gray_TRUNC);
+    
+    	//灰度图像大律法和三角形法二值化
+    	Mat img_Thr = imread("threshold.jpg", IMREAD_GRAYSCALE);
+    	Mat img_Thr_O, img_Thr_T;
+    	threshold(img_Thr, img_Thr_O, 100, 255, THRESH_BINARY | THRESH_OTSU);
+    	threshold(img_Thr, img_Thr_T, 125, 255, THRESH_BINARY | THRESH_TRIANGLE);
+    	imshow("img_Thr", img_Thr);
+    	imshow("img_Thr_O", img_Thr_O);
+    	imshow("img_Thr_T", img_Thr_T);
+    
+    	//灰度图像自适应二值化
+    	Mat adaptive_mean, adaptive_gauss;
+    	adaptiveThreshold(img_Thr, adaptive_mean, 255, ADAPTIVE_THRESH_MEAN_C,THRESH_BINARY,55,0);
+    	adaptiveThreshold(img_Thr, adaptive_gauss, 255, ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,55,0);
+    
+    	imshow("adaptive_mean", adaptive_mean);
+    	imshow("adaptive_gauss", adaptive_gauss);
+    	waitKey(0);
+    	return 0;
+    } 
+    ```
+
 - 检测直线
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  void drawLine(Mat &img, vector<Vec2f> lines, double rows, double cols, Scalar scalar, int n)
+  {
+  	Point pt1, pt2;
+  	for (size_t i = 0; i < lines.size(); i++)
+  	{
+  		float rho = lines[i][0];
+  		float theta = lines[i][1];
+  		double a = cos(theta);
+  		double b = sin(theta);
+  		double x0 = a*rho, y0 = b*rho;
+  		double length = max(rows, cols);
+  
+  		pt1.x = cvRound(x0 + length * (-b));
+  		pt1.y = cvRound(y0 + length * (a));
+  		//计算直线上另一点
+  		pt2.x = cvRound(x0 - length * (-b));
+  		pt2.y = cvRound(y0 - length * (a));
+  		//两点绘制一条直线
+  		line(img, pt1, pt2, scalar, n);
+  	}
+  }
+  
+  int main()
+  {
+  	Mat img = imread("HoughLines.jpg", IMREAD_GRAYSCALE);
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	Mat edge;
+  
+  	//对灰度图像进行边缘提取   检测边缘图像，并二值化
+  	Canny(img, edge, 80, 180, 3, false);
+  	threshold(edge, edge, 170, 255, THRESH_BINARY);
+  
+  	//用不同的累加器进行检测直线
+  	vector<Vec2f> lines1, lines2;
+  	//累加器较小时较短的直线可以被检测出来
+  	HoughLines(edge, lines1, 1, CV_PI / 180, 50, 0, 0);
+  	//累加器较大时只能检测出图像中较长的直线
+  	HoughLines(edge, lines2, 1, CV_PI / 180, 150, 0, 0);
+  
+  	//在原图像中绘制直线
+  	Mat img1, img2;
+  	img.copyTo(img1);
+  	img.copyTo(img2);
+  	drawLine(img1, lines1, edge.rows, edge.cols, Scalar(255), 2);
+  	drawLine(img2, lines2, edge.rows, edge.cols, Scalar(255), 2);
+  
+  	imshow("edge", edge);
+  	imshow("img", img);
+  	imshow("img1", img1);
+  	imshow("img2", img2);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("HoughLines.jpg", IMREAD_GRAYSCALE);
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	Mat edge;
+  
+  	//对灰度图像进行边缘提取   检测边缘图像，并二值化
+  	Canny(img, edge, 80, 180, 3, false);
+  	threshold(edge, edge, 170, 255, THRESH_BINARY);
+  
+  	//利用渐进概率式霍夫变换提取直线
+  	vector<Vec4i> linesP1, linesP2;
+  	//HoughLinesP()函数的最大特点是能够直接给出图像中直线或者线段两个端点的像素坐标，因此可较精确的定位到图像中直线的位置
+  	//两个点连接最大距离10
+  	HoughLinesP(edge, linesP1, 1, CV_PI / 180, 150, 30, 10);
+  	//两个点连接最大距离30,参数较大时倾斜直线检测的完整度较高
+  	HoughLinesP(edge, linesP2, 1, CV_PI / 180, 150, 30, 30);
+  
+  	//绘制两个点连接最大距离10直线检测结果
+  	Mat img1;
+  	img.copyTo(img1);
+  	for (size_t i = 0; i < linesP1.size(); i++)
+  	{
+  		line(img1, Point(linesP1[i][0], linesP1[i][1]),
+  			Point(linesP1[i][2], linesP1[i][3]), Scalar(255), 3);
+  	}
+  
+  	//绘制两个点连接最大距离30直线检测结果
+  	Mat img2;
+  	img.copyTo(img2);
+  	for (size_t i = 0; i < linesP2.size(); i++)
+  	{
+  		line(img2, Point(linesP2[i][0], linesP2[i][1]),
+  			Point(linesP2[i][2], linesP2[i][3]), Scalar(255), 3);
+  	}
+  
+  	imshow("img1", img1);
+  	imshow("img2", img2);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//更改输出界面颜色
+  	system("color F0");
+  
+  	//存放检测直线结果的矩阵
+  	Mat lines;	
+  	//换一种结果存放形式
+  	vector<Vec3d> line3d;
+  
+  	//待检测是否存在直线的所有点
+  	vector<Point2f> point;
+  
+  	const static float Points[20][2] = {
+  			{ 0.0f,   369.0f },{ 10.0f,  364.0f },{ 20.0f,  358.0f },{ 30.0f,  352.0f },
+  			{ 40.0f,  346.0f },{ 50.0f,  341.0f },{ 60.0f,  335.0f },{ 70.0f,  329.0f },
+  			{ 80.0f,  323.0f },{ 90.0f,  318.0f },{ 100.0f, 312.0f },{ 110.0f, 306.0f },
+  			{ 120.0f, 300.0f },{ 130.0f, 295.0f },{ 140.0f, 289.0f },{ 150.0f, 284.0f },
+  			{ 160.0f, 277.0f },{ 170.0f, 271.0f },{ 180.0f, 266.0f },{ 190.0f, 260.0f }
+  	 };
+  
+  	//将所有点存放在vector中，用于输入函数中
+  	for (int i = 0; i < 20; i++)
+  	{
+  		point.push_back(Point2f(Points[i][0], Points[i][1]));
+  	}
+  	//参数设置
+  	double rhoMin = 0.0f;		//最小长度
+  	double rhoMax = 360.0f;		//最大长度
+  	double rhoStep = 1;		//离散化单位距离长度
+  	double thetaMin = 0.0f;		//最小角度
+  	double thetaMax = CV_PI / 2.0f;		//最大角度
+  	double thetaStep = CV_PI / 180.0f;		//离散化单位角度弧度
+  	//在含有坐标的众多点中寻找是否存在直线的HoughLinesPointSet()函数
+  	HoughLinesPointSet(point, lines, 20, 1, rhoMin, rhoMax, rhoStep, thetaMin, thetaMax, thetaStep);
+  	lines.copyTo(line3d);
+  
+  	//输出结果
+  	for (int i = 0; i < line3d.size(); i++)
+  	{
+  		cout << "votes：" << (int)line3d.at(i).val[0] << ","
+  			<< "rh0：" << line3d.at(i).val[1] << ","
+  			<< "theta：" << line3d.at(i).val[2] << endl;
+  	}
+  	return 0;
+  }
+  ```
 
 - 直线拟合
 
