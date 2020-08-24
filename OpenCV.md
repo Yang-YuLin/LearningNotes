@@ -3523,6 +3523,117 @@
 
 - 轮廓面积与长度
 
+  - 轮廓面积
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	//用四个点表示三角形轮廓
+    	vector<Point> contour;
+    	contour.push_back(Point2f(0, 0));
+    	contour.push_back(Point2f(10, 0));
+    	contour.push_back(Point2f(10, 10));
+    	contour.push_back(Point2f(5, 5));
+    	double area = contourArea(contour);
+    	cout << "area = " << area << endl;
+    	
+    	Mat img = imread("coins.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	imshow("原图", img);
+    	Mat gray, binary;
+    	//转化成灰度图
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    	//平滑滤波
+    	GaussianBlur(gray, gray, Size(9, 9), 2, 2);
+    	//自适应二值化
+    	threshold(gray, binary, 170, 255, THRESH_BINARY | THRESH_OTSU);
+    
+    	//轮廓
+    	vector<vector<Point>> contours;
+    	//存放轮廓结构变量
+    	vector<Vec4i> hierarchy;
+    	findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
+    	
+    	//输出轮廓面积
+    	for (int t = 0; t < contours.size(); t++)
+    	{
+    		double area1 = contourArea(contours[t]);
+    		cout << "第" << t << "个轮廓面积=" << area1 << endl;
+    	}
+    	return 0;
+    }
+    ```
+
+  - 轮廓长度
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	//用四个点表示三角形轮廓
+    	vector<Point> contour;
+    	contour.push_back(Point2f(0, 0));
+    	contour.push_back(Point2f(10, 0));
+    	contour.push_back(Point2f(10, 10));
+    	contour.push_back(Point2f(5, 5));
+    
+    	double length0 = arcLength(contour, true);
+    	double length1 = arcLength(contour, false);
+    	cout << "length0= " << length0 << endl;
+    	cout << "length1= " << length1 << endl;
+    	
+    	Mat img = imread("coins.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	imshow("原图", img);
+    	Mat gray, binary;
+    	//转化成灰度图
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    	//平滑滤波
+    	GaussianBlur(gray, gray, Size(9, 9), 2, 2);
+    	//自适应二值化
+    	threshold(gray, binary, 170, 255, THRESH_BINARY | THRESH_OTSU);
+    
+    	//轮廓
+    	vector<vector<Point>> contours;
+    	//存放轮廓结构变量
+    	vector<Vec4i> hierarchy;
+    	findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
+    	
+    	//输出轮廓长度
+    	for (int t = 0; t < contours.size(); t++)
+    	{
+    		double length2 = arcLength(contours[t], true);
+    		cout << "第" << t << "个轮廓长度=" << length2 << endl;
+    	}
+    	return 0;
+    }
+    ```
+
 - 轮廓外接多边形
 
 - 图像矩的计算与应用
