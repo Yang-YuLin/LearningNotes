@@ -3413,7 +3413,113 @@
 
 - 圆形检测
 
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("coins.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  	imshow("原图", img);
+  	Mat gray;
+  	cvtColor(img, gray, COLOR_BGR2GRAY);
+  	//平滑滤波
+  	GaussianBlur(gray, gray, Size(9, 9), 2, 2);
+  
+  	//检测圆形
+  	vector<Vec3f> circles;
+  	double dp = 2;
+  	double minDist = 10;		//两个圆心之间的最小距离
+  	double param1 = 100;		//Canny边缘检测的较大阈值
+  	double param2 = 100;		//累加器阈值
+  	int min_radius = 20;			//圆形半径的最小值
+  	int max_radius = 100;		//圆形半径的最大值
+  	HoughCircles(gray, circles, HOUGH_GRADIENT, dp, minDist, param1, param2,min_radius,max_radius);
+  
+  	//图像中标记出圆形
+  	for (size_t i = 0; i < circles.size(); i++)
+  	{
+  		//读取圆心
+  		Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+  		//读取半径
+  		int radius = cvRound(circles[i][2]);
+  		//绘制圆心
+  		circle(img, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+  		//绘制圆
+  		circle(img, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+  	}
+  
+  	//显示结果
+  	imshow("圆形检测结果", img);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
+
 - 轮廓发现与绘制
+
+  - 图像的轮廓不仅能够提供物体的边缘，而且还能提供物体边缘之间的层次关系以及拓扑关系。
+
+  - 可以将图像轮廓发现简单理解为带有结构关系的边缘检测，这种结构关系可以表明图像中连通域或者某些区域之间的关系。
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	Mat img = imread("coins.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	imshow("原图", img);
+    	Mat gray,binary;
+    	//转化成灰度图
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    	//平滑滤波
+    	GaussianBlur(gray, gray, Size(9, 9), 2, 2);
+    	//自适应二值化
+    	threshold(gray, binary, 170, 255, THRESH_BINARY | THRESH_OTSU);
+    
+    	//轮廓发现与绘制
+    	vector<vector<Point>> contours;
+    	//存放轮廓结构变量
+    	vector<Vec4i> hierarchy;
+    	findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point());
+    	//绘制轮廓
+    	for (int t = 0; t < contours.size(); t++)
+    	{
+    		drawContours(img, contours, t, Scalar(0, 0, 255), 2, 8);
+    	}
+    	//输出轮廓结构描述子
+    	for (int i = 0; i < hierarchy.size(); i++)
+    	{
+    		cout << hierarchy[i] << endl;
+    	}
+    
+    	//显示结果
+    	imshow("轮廓检测结果", img);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
 
 - 轮廓面积与长度
 
