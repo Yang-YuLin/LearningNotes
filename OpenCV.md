@@ -2689,12 +2689,9 @@
     	return 0;
     }
     ```
-  ```
-    
   
   ![image-20200818102834555](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200818102834555.png)
-  ```
-
+  
 - 图像距离变换
 
   - 图像中两个像素之间的距离：欧式距离、街区距离、棋盘距离。
@@ -3856,23 +3853,568 @@
   }
   ```
 
-  - Hu矩
+  - Hu矩：具有旋转、平移和缩放比例不变性
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//更改输出界面颜色
+    	system("color F0");
+    	Mat img = imread("approx.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	//二值化
+    	Mat gray, binary;
+    	cvtColor(img, gray, COLOR_BGR2GRAY);
+    	threshold(gray, binary, 105, 255, THRESH_BINARY);
+    
+    	//开运算消除细小区域
+    	Mat k = getStructuringElement(MORPH_RECT, Size(3, 3), Point(-1, -1));
+    	morphologyEx(binary, binary, MORPH_OPEN, k);
+    
+    	//轮廓发现
+    	vector<vector<Point>> contours;
+    	vector<Vec4i> hierarchy;
+    	findContours(binary, contours, hierarchy, 0, 2, Point());
+    	for (int n = 0; n < contours.size(); n++)
+    	{
+    		Moments M;
+    		M = moments(contours[n], true);
+    		Mat hu;
+    		//计算Hu矩
+    		HuMoments(M, hu);
+    		cout << hu << endl;
+    	}
+    	return 0;
+    }
+    ```
+
+  - 基于Hu矩的轮廓匹配
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <vector>
+    
+    using namespace cv;
+    using namespace std;
+    
+    //连通域查找函数
+    void findcontours(Mat &image, vector<vector<Point>> &contours)
+    {
+    	Mat gray, binary;
+    	vector<Vec4i> hierarchy;
+    	//图像灰度化
+    	cvtColor(image, gray, COLOR_BGR2GRAY);
+    	//图像二值化
+    	threshold(gray, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    	//寻找轮廓
+    	findContours(binary, contours, hierarchy, 0, 2);
+    }
+    
+    int main()
+    {
+    	Mat img = imread("ABC.jpg");
+    	Mat img_B = imread("B.jpg");
+    	if (img.empty() || img_B.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	resize(img_B, img_B, Size(), 0.5, 0.5);
+    	imwrite("B.jpg", img_B);
+    	imshow("B", img_B);
+    
+    	//轮廓提取
+    	vector<vector<Point>> contours1;
+    	vector<vector<Point>> contours2;
+    	findcontours(img, contours1);
+    	findcontours(img_B, contours2);
+    	//hu矩计算
+    	Moments mm2 = moments(contours2[0]);
+    	Mat hu2;
+    	HuMoments(mm2, hu2);
+    	//轮廓匹配
+    	for (int n = 0; n < contours1.size(); n++)
+    	{
+    		Moments mm = moments(contours1[n]);
+    		Mat hum;
+    		HuMoments(mm, hum);
+    		//Hu矩匹配
+    		double dist;
+    		dist = matchShapes(hum, hu2, CONTOURS_MATCH_I1, 0);
+    		if (dist < 1)
+    		{
+    			drawContours(img, contours1, n, Scalar(0, 255, 0), 3, 8);
+    		}
+    	}
+    	imshow("match result", img);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200826163524371](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826163524371.png)
 
 - 点集拟合
 
-- 漫水填充法
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	//Scalar::all(0) 就是给每个通道都赋值0
+  	Mat img(500, 500, CV_8UC3, Scalar::all(0));
+  	//生成随机点
+  	RNG& rng = theRNG();
+  
+  	while (true)
+  	{
+  		int i, count = rng.uniform(1, 101);
+  		vector<Point> points;
+  		//生成随机点
+  		for (i = 0; i < count; i++)
+  		{
+  			Point pt;
+  			pt.x = rng.uniform(img.cols / 4, img.cols * 3 / 4);
+  			pt.y = rng.uniform(img.rows / 4, img.rows * 3 / 4);
+  			points.push_back(pt);
+  		}
+  
+  		//寻找包围点集的三角形
+  		vector<Point2f> triangle;
+  		double area = minEnclosingTriangle(points, triangle);
+  
+  		//寻找包围点集的圆形
+  		Point2f center;
+  		float radius = 0;
+  		minEnclosingCircle(points, center, radius);
+  
+  		//创建两个图片用于输出结果
+  		img = Scalar::all(0);
+  		Mat img2;
+  		img.copyTo(img2);
+  
+  		//在图像中绘制坐标点
+  		for (int i = 0; i < count; i++)
+  		{
+  			circle(img, points[i], 3, Scalar(255, 255, 255), FILLED, LINE_AA);
+  			circle(img2, points[i], 3, Scalar(255, 255, 255), FILLED, LINE_AA);
+  		}
+  
+  		//绘制三角形
+  		for (i = 0; i < 3; i++)
+  		{
+  			if (i == 2)
+  			{
+  				line(img, triangle[i], triangle[0], Scalar(255, 255, 255), 1, 16);
+  				break;
+  			}
+  			line(img, triangle[i], triangle[i+1], Scalar(255, 255, 255), 1, 16);
+  		}
+  
+  		//绘制圆形
+  		circle(img2, center, cvRound(radius), Scalar(255, 255, 255), 1, LINE_AA);
+  
+  		//输出结果
+  		imshow("triangle", img);
+  		imshow("circle", img2);
+  
+  		//按q键或者ESC键退出程序
+  		char key = (char)waitKey();
+  		if (key == 27 || key == 'q' || key == 'Q')
+  		{
+  			break;
+  		}
+  	}
+  	return 0;
+  }
+  ```
 
-- 分割图像——Grabcut图像分割
+  ![image-20200826170543479](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826170543479.png)
 
-- 分割图像——Mean-Shift分割算法
+- 漫水填充法**分割图像（注水）**   floodFill()函数
+
+  - 根据像素灰度值之间的差值寻找相同区域实现**分割**
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	//将DOS界面调成白底黑字
+    	system("color F0");
+    	Mat img = imread("lena.jpg");
+    	if (!(img.data))
+    	{
+    		cout << "读取图像错误，请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	//随机数，用于随机生成像素
+    	RNG rng(10086);
+    
+    	//设置操作标志flags
+    	int connectivity = 4;		//连通邻域方式
+    	int maskVal = 255;		//掩码图像的数值
+    	int flags = connectivity | (maskVal << 8) | FLOODFILL_FIXED_RANGE;		//漫水填充操作方式标志
+    
+    	//设置与选中像素点的差值
+    	Scalar loDiff = Scalar(20, 20, 20);
+    	Scalar upDiff = Scalar(20, 20, 20);
+    
+    	//声明掩模矩阵变量
+    	Mat mask = Mat::zeros(img.rows + 2, img.cols + 2, CV_8UC1);
+    
+    	while (true)
+    	{
+    		//随机产生图像中某一像素点
+    		int py = rng.uniform(0, img.rows - 1);
+    		int px = rng.uniform(0, img.cols - 1);
+    		Point point = Point(px, py);
+    
+    		//彩色图像中填充的像素值
+    		Scalar newVal = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+    
+    		//漫水填充函数
+    		int area = floodFill(img, mask, point, newVal, &Rect(), loDiff, upDiff, flags);
+    
+    		//输出像素点和填充的像素数目
+    		cout << "像素点x：" << point.x << " y：" << point.y
+    			<< "   填充像素数目：" << area << endl;
+    
+    		//输出填充的图像结果
+    		imshow("填充的彩色图像", img);
+    		imshow("掩模图像", mask);
+    
+    		//判断是否结束程序
+    		int c = waitKey(0);
+    		if ((c & 255) == 27)
+    		{
+    			break;
+    		}
+    	}
+    	return 0;
+    }
+    ```
+
+    ![image-20200826193231617](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826193231617.png)
+
+- 分割图像——分水岭法    watershed()函数
+
+  - 分水岭算法与漫水填充法相似，都是模拟水淹过山地的场景，区别是漫水填充法是从局部某个像素值进行分割，是一种局部分割算法，而分水岭法是从全局出发，需要对全局都进行分割
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace std;
+    using namespace cv;
+    
+    int main()
+    {
+    	Mat img, imgGray, imgMask;
+    	Mat maskWaterShed;
+    	//原图像
+    	img = imread("HoughLines.jpg");
+    	if (img.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	cvtColor(img, imgGray, COLOR_BGR2GRAY);
+    	//GaussianBlur(imgGray, imgGray, Size(5, 5), 10, 20);  //模糊用于减少边缘数目
+    
+    	//提取边缘并进行闭运算
+    	Canny(imgGray, imgMask, 150, 300);
+    
+    	imshow("边缘图像", imgMask);
+    	imshow("原图像", img);
+    
+    	//计算连通域数目
+    	vector<vector<Point>> contours;
+    	vector<Vec4i> hierarchy;
+    	findContours(imgMask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+    
+    	//在maskWaterShed上绘制轮廓，用于输入分水岭算法
+    	maskWaterShed = Mat::zeros(imgMask.size(), CV_32S);
+    	for (int index = 0; index < contours.size(); index++)
+    	{
+    		drawContours(maskWaterShed, contours, index, Scalar::all(index + 1), -1, 8, hierarchy, INT_MAX);
+    	}
+    	//分水岭算法  需要对原图像进行处理
+    	watershed(img, maskWaterShed);
+    
+    	//随机生成几种颜色
+    	vector<Vec3b> colors;
+    	for (int i = 0; i < contours.size(); i++)
+    	{
+    		int b = theRNG().uniform(0, 255);
+    		int g = theRNG().uniform(0, 255);
+    		int r = theRNG().uniform(0, 255);
+    		colors.push_back(Vec3b((uchar)b, (uchar)g, (uchar)r));
+    	}
+    
+    	//显示图像
+    	Mat resultImg = Mat(img.size(), CV_8UC3);
+    	for (int i = 0; i < imgMask.rows; i++)
+    	{
+    		for (int j = 0; j < imgMask.cols; j++)
+    		{
+    			//绘制每个区域的颜色
+    			int index = maskWaterShed.at<int>(i, j);
+    			//区域间的值被置为-1（边界）
+    			if (index == -1)
+    			{
+    				resultImg.at<Vec3b>(i, j) = Vec3b(255, 255, 255);
+    			}
+    			//没有标记清楚的区域被置为0
+    			else if (index <= 0 || index > contours.size())
+    			{
+    				resultImg.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+    			}
+    			//其他每个区域的值保持不变：1,2,...,contours.size()
+    			else
+    			{
+    				//把这些区域绘制成不同颜色
+    				resultImg.at<Vec3b>(i, j) = colors[index - 1];
+    			}
+    		}
+    	}
+    
+    	resultImg = resultImg * 0.6 + img * 0.4;
+    	imshow("分水岭结果", resultImg);
+    
+    	//绘制每个区域的图像
+    	for (int n = 1; n <= contours.size(); n++)
+    	{
+    		//声明一个最后要显示的图像
+    		Mat resImage1 = Mat(img.size(), CV_8UC3);
+    		for (int i = 0; i < imgMask.rows; i++)
+    		{
+    			for (int j = 0; j < imgMask.cols; j++)
+    			{
+    				int index = maskWaterShed.at<int>(i, j);
+    				if (index == n)
+    					resImage1.at<Vec3b>(i, j) = img.at<Vec3b>(i, j);
+    				else
+    					resImage1.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+    			}
+    			//显示图像
+    			imshow(to_string(n), resImage1);
+    		}
+    		waitKey(0);
+    		return 0;
+    	}
+    }
+    ```
+
+  ![image-20200826214857215](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826214857215.png)
+
+- 分割图像——Grabcut算法图像分割    grabCut()函数
+
+  - 使用高斯混合模型估计目标区域的背景和前景
+
+  - 通过迭代的方法解决了能量函数最小化的问题，使得结果具有更高的可靠性
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("lena.jpg");
+    	//防止错误读取图像
+    	if (!img.data)
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return 0;
+    	}
+    
+    	//绘制矩形
+    	Mat imgRect;
+    	//备份图像，防止绘制矩形框对结果产生影响
+    	img.copyTo(imgRect);
+    	Rect rect(80,30,340,390);
+    	rectangle(imgRect, rect, Scalar(255, 255, 255), 2);
+    	imshow("选择的矩形区域", imgRect);
+    
+    	//进行分割
+    	Mat bgdmod = Mat::zeros(1, 65, CV_64FC1);
+    	Mat fgdmod = Mat::zeros(1, 65, CV_64FC1);
+    	Mat mask = Mat::zeros(img.size(), CV_8UC1);
+    	grabCut(img, mask, rect, bgdmod, fgdmod, 5, GC_INIT_WITH_RECT);
+    
+    	//将分割出的前景绘制回来
+    	Mat result;
+    	for (int row = 0; row < mask.rows; row++)
+    	{
+    		for (int col = 0; col < mask.cols; col++)
+    		{
+    			int n = mask.at<uchar>(row, col);
+    			//将明显是前景和可能是前景的区域都保留
+    			if (n == 1 || n == 3)
+    			{
+    				mask.at<uchar>(row, col) = 255;
+    			}
+    			//将明显是背景和可能是背景的区域都删除
+    			else
+    			{
+    				mask.at<uchar>(row, col) = 0;
+    			}
+    		}
+    	}
+    	bitwise_and(img, img, result, mask);
+    	imshow("分割结果", result);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200826202109838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826202109838.png)
+
+- 分割图像——Mean-Shift分割算法   pyrMeanShiftFiltering()函数
+
+  - 又称为均值漂移法，是一种基于颜色空间分布的图像分割算法   基于彩色图像的像素值的图像分割
+
+  - 该算法的输出是一个经过滤色的“分色”图像，其**颜色**会变得**渐变**，并且细纹**纹理**会变得**平缓**
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("coin.jpg");
+    	if (!img.data)
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    
+    	//分割处理
+    	Mat result1, result2;
+    	TermCriteria T10 = TermCriteria(TermCriteria::COUNT | TermCriteria::EPS, 10, 0.1);
+    	//第一次分割
+    	pyrMeanShiftFiltering(img, result1, 20, 40, 2, T10);
+    	//第一次分割的结果再次分割
+    	pyrMeanShiftFiltering(result1, result2, 20, 40, 2, T10);
+    
+    	//显示分割结果
+    	imshow("img", img);
+    	imshow("result1", result1);
+    	imshow("result2", result2);
+    
+    	//对图像提取Canny边缘
+    	Mat imgCanny, result1Canny, result2Canny;
+    	Canny(img, imgCanny, 150, 200);
+    	Canny(result1, result1Canny, 150, 300);
+    	Canny(result2, result2Canny, 150, 300);
+    
+    	//显示边缘检测结果
+    	imshow("imgCanny", imgCanny);
+    	imshow("result1Canny", result1Canny);
+    	imshow("result2Canny", result2Canny);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+    ![image-20200826204724080](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826204724080.png)
 
 - 图像恢复
+
+  - 图像修复技术就是利用图像中损坏区域边缘的像素，根据像素值的大小以及像素间的结构关系，估计出损坏区域可能的像素排列，从而去除图像中受污染的区域
+
+  - 图像修复不仅可以去除图像中的“划痕”，还可以去除图像中得水印、日期等
+
+    **污染区域较细并且较为稀疏的情况下图像修复效果较好，污染区域较为密集时修复效果较差**
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img1 = imread("inpaint1.jpg");
+    	Mat img2 = imread("inpaint2.jpg");
+    	if (img1.empty() || img2.empty())
+    	{
+    		cout << "请确认图像文件名称是否正确" << endl;
+    		return -1;
+    	}
+    	imshow("img1", img1);
+    	imshow("img2", img2);
+    
+    	//转换为灰度图
+    	Mat img1Gray, img2Gray;
+    	cvtColor(img1, img1Gray, COLOR_RGB2GRAY, 0);
+    	cvtColor(img2, img2Gray, COLOR_RGB2GRAY, 0);
+    
+    	//通过阈值处理生成Mask掩模
+    	Mat img1Mask, img2Mask;
+    	threshold(img1Gray, img1Mask, 245, 255, THRESH_BINARY);
+    	threshold(img2Gray, img2Mask, 245, 255, THRESH_BINARY);
+    
+    	//对Mask膨胀处理，增加Mask面积
+    	Mat Kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
+    	dilate(img1Mask, img1Mask, Kernel);
+    	dilate(img2Mask, img2Mask, Kernel);
+    
+    	imshow("img1Mask", img1Mask);
+    	imshow("img2Mask", img2Mask);
+    
+    
+    	//图像修复
+    	Mat img1Inpaint, img2Inpaint;
+    	inpaint(img1, img1Mask, img1Inpaint, 5, INPAINT_NS);
+    	inpaint(img2, img2Mask, img2Inpaint, 5, INPAINT_NS);
+    
+    	//显示处理结果
+    	imshow("img1修复后", img1Inpaint);
+    	imshow("img2修复后", img2Inpaint);
+    
+    	waitKey();
+    	return 0;
+    }
+    ```
+
+    ![image-20200826221754847](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826221754847.png)
 
 - 深度神经网络应用实例
 
 - QR二维码检测
-
-- 分割图像——分水岭法
 
 
 
