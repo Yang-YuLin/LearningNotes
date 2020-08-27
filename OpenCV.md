@@ -1011,7 +1011,7 @@
   }
   ```
 
-  ![image-20200727161141003](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727161141003.png)
+  ![image-20200727161141003.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dw5q5mzj20d707bq6x.jpg)
 
 - 图像透视变换：按照物体成像投影规律进行变换，即将物体重新投影到新的成像平面，通过图像的透视变换实现对物体图像的校正
 
@@ -1058,7 +1058,7 @@
   }
   ```
 
-  ![image-20200727163918034](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200727163918034.png)
+  ![image-20200727163918034.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dvvskjwj20da06s0wa.jpg)
 
 - 图像连接：将两个具有相同高度或者宽度的图像连接在一起
 
@@ -1158,7 +1158,7 @@
   }
   ```
 
-  ![image-20200728160307438](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200728160307438.png)
+  ![image-20200728160307438.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dvbr9zqj20da0853zf.jpg)
 
 - 图像上绘制几何图形
 
@@ -1233,7 +1233,7 @@
   }
   ```
 
-  ![image-20200728170621371](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200728170621371.png)
+  ![image-20200728170621371.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5duz75chj20e90f0a9z.jpg)
 
 - 图像金字塔：通过多个分辨率表示图像的一种有效且简单的结构。
 
@@ -1246,7 +1246,7 @@
     - 一般情况下，高斯金字塔的底部为图像的原图，每上一层就会通过下采样缩小一次图像的尺寸，通过情况尺寸会缩小为原来的一半。常见的层数为3到6层。
     - pyrDown()用于实现图像模糊并对其进行下采样计算，最终实现尺寸缩小的下采样图像。
 
-    ![image-20200729205330337](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200729205330337.png)
+    ![image-20200729205330337.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dunel7xj208y053dg2.jpg)
 
   - 拉普拉斯金字塔：具有预测残差的作用，需与高斯金字塔一起使用。通过上层小尺寸的图像构建下层大尺寸的图像。
 
@@ -1477,7 +1477,7 @@
     }
     ```
 
-    ![image-20200730191019789](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730191019789.png)
+    ![image-20200730191019789.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5du8iebuj20c506n759.jpg)
 
 - 直方图操作
 
@@ -1559,7 +1559,7 @@
       }
       ```
 
-    ![image-20200730213425946](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730213425946.png)
+    ![image-20200730213425946.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dtrwynqj20c905mglo.jpg)
 
   - 直方图比较
 
@@ -1633,7 +1633,7 @@
       }
       ```
 
-  ![image-20200730221324738](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200730221324738.png)
+  ![image-20200730221324738.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dqnxq1vj20fq054dg3.jpg)
 
 - 直方图应用
 
@@ -1698,7 +1698,7 @@
       }
       ```
     
-      ![image-20200801120432113](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200801120432113.png)
+      ![image-20200801120432113.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dq2zdltj20eb0cljua.jpg)
     
   - 直方图匹配
 
@@ -1806,9 +1806,9 @@
       }
       ```
 
-      ![image-20200810145601973](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810145601973.png)
+      ![image-20200810145601973.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dpkjzjhj211x095doo.jpg)
 
-      ![image-20200810145709266](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810145709266.png)
+      ![image-20200810145709266.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dp9z9tbj211y0bu747.jpg)
 
   - 直方图反向投影
 
@@ -1881,7 +1881,7 @@
       }
       ```
     
-      ![image-20200810203430856](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810203430856.png)
+      ![image-20200810203430856.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dou70juj20bz0cw77z.jpg)
 
 - 图像卷积
 
@@ -2020,9 +2020,9 @@
     }
     ```
 
-    ![image-20200810220513101](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810220513101.png)
+    ![image-20200810220513101.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5do0tuqvj20bx06q41c.jpg)
 
-    ![image-20200810220606851](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200810220606851.png)
+    ![image-20200810220606851.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dnl21j9j20s80f314x.jpg)
 
   - 高斯噪声：出现在图像中的所有位置
 
@@ -2067,7 +2067,7 @@
     }
     ```
     
-    ![image-20200811112442481](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200811112442481.png)
+    ![image-20200811112442481.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dnavzlmj20g00ddajv.jpg)
 
 - 均值滤波
 
@@ -2189,7 +2189,7 @@
 
   - 高斯滤波器考虑了像素离滤波器中心距离的影响，以滤波器中心位置为高斯分布的均值，根据高斯分布公式和每个像素离中心位置的距离计算出滤波器内每个位置的数值，从而形成一个形如下图所示的**高斯滤波器**。之后将高斯滤波器与图像之间进行滤波操作，进而实现对图像的高斯滤波。
 
-    ![image-20200812180234354](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200812180234354.png)
+    ![image-20200812180234354.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dmwgd76j207w04tq43.jpg)
 
   - 为了了解高斯滤波对不同噪声的去除效果，在代码中利用高斯滤波分别处理不含有噪声的图像、含有椒盐噪声的图像和含有高斯噪声的图像。通过结果可以发现，高斯滤波对高斯噪声去除效果较好，但是同样会对图像造成模糊，并且滤波器的尺寸越大，滤波后图像变得越模糊。
 
@@ -2429,7 +2429,7 @@
     }
     ```
 
-    ![image-20200813170200992](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813170200992.png)
+    ![image-20200813170200992.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dmi4crmj20i00dh12q.jpg)
 
 - Sobel算子
 
@@ -2473,7 +2473,7 @@
     }
     ```
     
-    ![image-20200813211124695](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813211124695.png)
+    ![image-20200813211124695.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dm0nh3mj20hs06qjxd.jpg)
 
 - Scharr算子
 
@@ -2519,7 +2519,7 @@
     }
     ```
 
-    ![image-20200813210902921](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813210902921.png)
+    ![image-20200813210902921.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dlglrx7j20hv06p0zv.jpg)
 
 - Laplacian算子
 
@@ -2562,7 +2562,7 @@
     }
     ```
 
-    ![image-20200813213802273](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200813213802273.png)
+    ![image-20200813213802273.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5djztchzj20bz06wadv.jpg)
 
 - **Canny算法**
 
@@ -2608,7 +2608,7 @@
     }
     ```
 
-    ![image-20200814095739574](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200814095739574.png)
+    ![image-20200814095739574.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5djinv70j20hs06r0t7.jpg)
 
 - 图像连通域分析
 
@@ -2690,7 +2690,7 @@
     }
     ```
   
-  ![image-20200818102834555](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200818102834555.png)
+  ![image-20200818102834555.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dj1s3j3j20dv04pt9k.jpg)
   
 - 图像距离变换
 
@@ -2761,7 +2761,7 @@
     }
     ```
 
-  ![image-20200818102903288](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200818102903288.png)
+  ![image-20200818102903288.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5diqi552j20du0b1dht.jpg)
 
 - 图像腐蚀
 
@@ -2880,13 +2880,13 @@
     }
     ```
 
-    ![image-20200819101519414](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819101519414.png)
+    ![image-20200819101519414.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5di1j1q1j20gr08ka9w.jpg)
 
     
 
-    ![image-20200819101605356](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819101605356.png)![image-20200819101639606](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819101639606.png)
+    ![image-20200819101605356.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi5dhklf3cj211x0adaih.jpg)![image-20200819101639606.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58tk6f2nj211y0efdl7.jpg)
 
-    ![image-20200819101848221](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819101848221.png)
+    ![image-20200819101848221.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58t06icej20bp06gacc.jpg)
 
 - 图像膨胀
 
@@ -2963,9 +2963,9 @@
     }
     ```
 
-    ![image-20200819111240757](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819111240757.png)
+    ![image-20200819111240757.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58sbwh0nj20gz08kmx0.jpg)
 
-    ![image-20200819111303113](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200819111303113.png)
+    ![image-20200819111303113.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58smctwqj211u0a9114.jpg)
 
 - 形态学应用
 
@@ -3966,7 +3966,7 @@
     }
     ```
 
-    ![image-20200826163524371](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826163524371.png)
+    ![image-20200826163524371.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58r3gyx7j20f705o74q.jpg)
 
 - 点集拟合
 
@@ -4048,7 +4048,7 @@
   }
   ```
 
-  ![image-20200826170543479](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826170543479.png)
+  ![image-20200826170543479.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58qss8asj20fa07wt91.jpg)
 
 - 漫水填充法**分割图像（注水）**   floodFill()函数
 
@@ -4119,7 +4119,7 @@
     }
     ```
 
-    ![image-20200826193231617](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826193231617.png)
+    ![image-20200826193231617.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58qh602oj211o0f0445.jpg)
 
 - 分割图像——分水岭法    watershed()函数
 
@@ -4231,7 +4231,7 @@
     }
     ```
 
-  ![image-20200826214857215](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826214857215.png)
+  ![image-20200826214857215.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58lh34i2j20gd0c60v0.jpg)
 
 - 分割图像——Grabcut算法图像分割    grabCut()函数
 
@@ -4296,7 +4296,7 @@
     }
     ```
 
-    ![image-20200826202109838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826202109838.png)
+    ![image-20200826202109838.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58l77lrbj20si0f27e8.jpg)
 
 - 分割图像——Mean-Shift分割算法   pyrMeanShiftFiltering()函数
 
@@ -4348,7 +4348,7 @@
     }
     ```
 
-    ![image-20200826204724080](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826204724080.png)
+    ![image-20200826204724080.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58kth8uhj20ax0dfdi9.jpg)
 
 - 图像恢复
 
@@ -4410,25 +4410,195 @@
     }
     ```
 
-    ![image-20200826221754847](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20200826221754847.png)
+    ![image-20200826221754847.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58k0i9xzj20g20e347m.jpg)
 
 - 深度神经网络应用实例
 
+  - 加载深度学习模型
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    
+    using namespace cv;
+    using namespace cv::dnn;
+    using namespace std;
+    
+    int main()
+    {
+    	system("color F0");
+    	string model = "bvlc_googlenet.caffemodel";
+    	string config = "bvlc_googlenet.prototxt";
+    
+    	//加载模型
+    	Net net = dnn::readNet(model, config);
+    	if (net.empty())
+    	{
+    		cout << "请确认是否输入空的模型文件" << endl;
+    		return -1;
+    	}
+    
+    	//获取各层信息
+    	vector<String> layerNames = net.getLayerNames();
+    	for (int i = 0; i < layerNames.size(); i++)
+    	{
+    		//读取每层网络的ID
+    		int ID = net.getLayerId(layerNames[i]);
+    		Ptr<Layer> layer = net.getLayer(ID);
+    		//输出网络信息
+    		cout << "网络层数：" << ID << "  网络层名称：" << layerNames[i] << endl
+    			<< "网络层类型：" << layer->type.c_str() << endl;
+    	}
+    	return 0;
+    }
+    ```
+
+  - 图像识别
+
+    ```c++
+    #include <opencv2/opencv.hpp>
+    #include <iostream>
+    #include <fstream>
+    
+    using namespace cv;
+    using namespace cv::dnn;
+    using namespace std;
+    
+    int main()
+    {
+    	Mat img = imread("airplane.jpg");
+    	if (img.empty())
+    	{
+    		printf("请确认图像文件名称是否正确");
+    		return -1;
+    	}
+    
+    	//读取分类种类名称
+    	String typeListFile = "imagenet_comp_graph_label_strings.txt";
+    	vector<String> typeList;
+    	fstream file(typeListFile);
+    	if (!file.is_open())
+    	{
+    		printf("请确认分类种类名称是否正确");
+    		return -1;
+    	}
+    
+    	std::string type;
+    	while (!file.eof())
+    	{
+    		//读取名称
+    		getline(file, type);
+    		if (type.length())
+    			typeList.push_back(type);
+    	}
+    	file.close();
+    
+    	//加载网络
+    	String tf_pb_file = "tensorflow_inception_graph.pb";
+    	Net net = readNet(tf_pb_file);
+    	if (net.empty())
+    	{
+    		printf("请确认模型文件是否为空文件");
+    		return -1;
+    	}
+    
+    	//对输入图像数据进行处理
+    	Mat blob = blobFromImage(img, 1.0f, Size(224, 224), Scalar(), true, false);
+    
+    	//进行图像种类预测
+    	Mat prob;
+    	net.setInput(blob, "input");
+    	prob = net.forward("softmax2");
+    
+    	//得到最可能分类输出
+    	Mat probMat = prob.reshape(1, 1);
+    	Point classNumber;
+    	//最大可能性
+    	double classProb;
+    	minMaxLoc(probMat, NULL, &classProb, NULL, &classNumber);
+    
+    	string typeName = typeList.at(classNumber.x).c_str();
+    	cout << "图像中物体可能为：" << typeName << "   可能性为：" << classProb;
+    
+    	//检测内容
+    	string str = typeName + " possibility:" + to_string(classProb);
+    	putText(img, str, Point(50, 50), FONT_HERSHEY_SIMPLEX, 1.0, Scalar(0, 0, 255), 2, 8);
+    
+    	imshow("图像判断结果", img);
+    	waitKey(0);
+    	return 0;
+    }
+    ```
+
+  ![image-20200827112727110.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58jo8duyj20e8097gqw.jpg)
+
 - QR二维码检测
 
+  ```c++
+  #include <opencv2/opencv.hpp>
+  #include <iostream>
+  #include <vector>
+  
+  using namespace cv;
+  using namespace std;
+  
+  int main()
+  {
+  	Mat img = imread("qrcode.jpg");
+  	if (img.empty())
+  	{
+  		cout << "请确认图像文件名称是否正确" << endl;
+  		return -1;
+  	}
+  
+  	Mat gray, qrcode_bin;
+  	cvtColor(img, gray, COLOR_BGR2GRAY);
+  	QRCodeDetector qrcodedetector;
+  	vector<Point> points;
+  	string information;
+  	bool isQRcode;
+  	//识别二维码
+  	isQRcode = qrcodedetector.detect(gray, points);
+  	if (isQRcode)
+  	{
+  		//解码二维码
+  		information = qrcodedetector.decode(gray, points, qrcode_bin);
+  		//输出二维码四个顶点的坐标
+  		cout << points << endl;
+  	}
+  	else
+  	{
+  		cout << "无法识别二维码，请确认图像是否含有二维码" << endl;
+  		return -1;
+  	}
+  	//绘制二维码的边框
+  	for (int i = 0; i < points.size(); i++)
+  	{
+  		if (i == points.size() - 1)
+  		{
+  			line(img, points[i], points[0], Scalar(0, 0, 255), 2, 8);
+  			break;
+  		}
+  		line(img, points[i], points[i + 1], Scalar(0, 0, 255), 2, 8);
+  	}
+  	//将解码内容输出到图片上
+  	putText(img, information.c_str(), Point(20,30),0,1.0, Scalar(0, 0, 255), 2, 8);
+  
+  	//利用函数直接定位二维码并解码
+  	string information2;
+  	vector<Point> points2;
+  	information2 = qrcodedetector.detectAndDecode(gray, points2);
+  	cout << points2 << endl;
+  	putText(img, information2.c_str(), Point(20, 55), 0, 1.0, Scalar(0, 0, 0), 2, 8);
+  
+  	//输出结果
+  	imshow("result", img);
+  	namedWindow("qrcode_bin", WINDOW_NORMAL);
+  	imshow("qrcode_bin", qrcode_bin);
+  	waitKey(0);
+  	return 0;
+  }
+  ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  ![image-20200827115647988.png](http://ww1.sinaimg.cn/large/8eb0608fly1gi58j9y4a2j20g108itb1.jpg)
 
